@@ -1,3 +1,5 @@
+import dom from './dom';
+
 const Account = (accountID, firstName, lastName, mobileNo, email, driverLicenseNumber, carPlateNumber, password) => {
     this.accountID = accountID;
     this.firstName = firstName;
@@ -12,26 +14,49 @@ const Account = (accountID, firstName, lastName, mobileNo, email, driverLicenseN
 const account = (() => {
     let url = 'http://localhost:5000/api/v1/accounts';
 
-    const searchAccount = (email, password) => {
+    const createAccount = (accountData) => {
+        let createURL = url + "/" + "id";
+
+        let request = new XMLHttpRequest();
+        request.open('POST', createURL);
+        
+        request.onload = function() {
+            if (request.status == 201) {
+                // Display account creation success
+                console.log("success")
+            } else if (request.status == 409) {
+                // Display account exist error
+                console.log("error")
+            } else {
+                dom.displayMessage('error', '');
+            }
+        }
+        console.log(accountData)
+        request.send(JSON.stringify(accountData));
+    }
+
+    const checkLogin = (email, password) => {
         let searchURL = url + `?email=${email}&password=${password}`;
         let request = new XMLHttpRequest();
         request.open('GET', searchURL);
     
         request.onload = function() {
-            let accountID = JSON.parse(this.response);
             // If email and password are found
             if (request.status == 200) {
-                console.log(accountID)
-            // Else
+                let accountID = JSON.parse(this.response);
+                console.log(accountID);
+                dom.changeToLoggedInUI();
+            // Else 
             } else {
-                console.log("error")
+                dom.displayLoginError();
             }
         }
         request.send();
     };
 
     return {
-        searchAccount,
+        createAccount,
+        checkLogin,
     }
 })();
 

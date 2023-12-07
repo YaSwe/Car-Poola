@@ -15,9 +15,26 @@ const handler = (() => {
 
             // Login button
             if (e.target.classList.contains('loginBtn')) {
-                let [email, password] = dom.getLoginFormInputs();
-                account.searchAccount(email, password);
+                let [email, password] = dom.getFormInputs('login');
+                account.checkLogin(email, password);
             }
+
+            // Signup Btn 
+            if (e.target.classList.contains('signUpBtn')) {
+                let courseData = dom.getFormInputs('signUp');
+                account.createAccount(courseData);
+            }
+
+            // Display registration form
+            if (e.target.classList.contains('displaySignUp')) {
+                dom.displaySignUpForm();
+            }
+
+            // Display login form
+            if (e.target.classList.contains('displayLogin')) {
+                dom.displayLoginForm();
+            }
+
         })
     }
 

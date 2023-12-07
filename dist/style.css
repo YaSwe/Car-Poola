@@ -10,6 +10,8 @@
     --cyan: #19A7CE;
     --light-blue: #AFD3E2;
     --dark-blue: #146C94;
+    --red: #ef4444;
+    --light-red: #E67B7B;
 }
 
 *,
@@ -167,12 +169,8 @@ html {
     color: var(--white);
 }
 
-/* Sign in form */
+/* Login & Registartion Forms */
 
-
-
-
-/* Account registration form */
 .accountForm {
     background: var(--light-grey);
     padding: 2.5rem;
@@ -236,16 +234,31 @@ input:not(:placeholder-shown) + .label label {
     color: black;
 }
 
-.selectUserType {
-    color: var(--dark-grey);
-    padding-top: 2rem;
-    cursor: pointer;
-    transition: 0.3s;
+.signUpLink, .loginLink {
+    margin-top: 2rem;
 }
 
-.selectUserType:hover {
-    color: var(--cyan);
+.displaySignUp, .displayLogin {
+    text-decoration: underline;
+    color: var(--dark-blue);
+    margin-left: 2px;
 }
+
+.displaySignUp:hover, .displayLogin:hover {
+    color: var(--light-blue);
+}
+
+.error-text {
+    color: var(--light-red);
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.loginError {
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
 
 /* Buttons */
 
@@ -265,6 +278,10 @@ input:not(:placeholder-shown) + .label label {
 .createAccBtn:hover, .loginBtn:hover {
     background-color: var(--dark-blue);
 }
+
+
+
+
 
 
 .hide {
