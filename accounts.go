@@ -144,9 +144,7 @@ func searchAccounts(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "No accounts found")
 		} else {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(struct {
-				ID string `json:"AccountID"`
-			}{id})
+			json.NewEncoder(w).Encode(id)
 		}
 	} else {
 		coursesWrapper := struct {
