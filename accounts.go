@@ -12,7 +12,6 @@ import (
 )
 
 type Account struct {
-	ID                  string `json:"ID"`
 	FirstName           string `json:"First Name"`
 	LastName            string `json:"Last Name"`
 	MobileNumber        string `json:"Mobile Number"`
@@ -56,6 +55,10 @@ func account(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var data Account
 		if err := json.Unmarshal(body, &data); err == nil {
+
+			// Get the last account ID
+			accountID := getLastAccountIndex()
+
 			if _, ok := isExist(accountID); !ok {
 				insertAccount(accountID, data)
 				w.WriteHeader(http.StatusCreated)
@@ -141,6 +144,7 @@ func searchAccounts(w http.ResponseWriter, r *http.Request) {
 		id, found := checkLoginCredentials(emailStr, passwordStr)
 
 		if !found {
+			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "No accounts found")
 		} else {
 			w.WriteHeader(http.StatusOK)
@@ -159,7 +163,7 @@ func isExist(id string) (Account, bool) {
 	var a Account
 
 	result := db.QueryRow("SELECT * FROM accounts WHERE ID=?", id)
-	err := result.Scan(&a.ID, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
+	err := result.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
 	if err == sql.ErrNoRows {
 		return a, false
 	}
@@ -178,7 +182,7 @@ func getCourses() map[string]Account {
 	for results.Next() {
 		var a Account
 		var id string
-		err := results.Scan(&a.ID, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
+		err := results.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -233,4 +237,20 @@ func checkLoginCredentials(email string, password string) (string, bool) {
 	}
 
 	return "", false
+}
+
+func getLastAccountIndex() string {
+	var lastIndex string
+	results, err := db.Query("SELECT MAX(ID) + 1 AS ACC_ID FROM accounts")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if results.Next() {
+		err = results.Scan(&lastIndex)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return lastIndex
 }
