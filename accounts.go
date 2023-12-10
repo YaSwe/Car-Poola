@@ -37,8 +37,8 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1/accounts/{accountID}", account).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/accounts", searchAccounts)
-	fmt.Println("Listening at port 5000")
-	log.Fatal(http.ListenAndServe(":5000", router))
+	fmt.Println("Listening at port 8000")
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
 func account(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +144,6 @@ func searchAccounts(w http.ResponseWriter, r *http.Request) {
 		id, found := checkLoginCredentials(emailStr, passwordStr)
 
 		if !found {
-			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "No accounts found")
 		} else {
 			w.WriteHeader(http.StatusOK)
