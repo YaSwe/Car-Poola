@@ -12,7 +12,7 @@ const Account = (accountID, firstName, lastName, mobileNo, email, driverLicenseN
 }
 
 const account = (() => {
-    let url = 'http://localhost:5000/api/v1/accounts';
+    let url = 'http://localhost:8000/api/v1/accounts';
 
     const createAccount = (accountData) => {
         let createURL = url + "/" + "id";
@@ -28,10 +28,9 @@ const account = (() => {
                 // Display account exist error
                 console.log("error")
             } else {
-                dom.displayMessage('error', '');
+                //dom.displayMessage('error', '');
             }
         }
-        console.log(accountData)
         request.send(JSON.stringify(accountData));
     }
 
@@ -43,9 +42,9 @@ const account = (() => {
         request.onload = function() {
             // If email and password are found
             if (request.status == 200) {
-                let accountID = JSON.parse(this.response);
-                console.log(accountID);
-                dom.changeToLoggedInUI();
+
+                //let accountID = JSON.parse(this.response);
+                window.location.href = 'loggedIn.html';
             // Else 
             } else {
                 dom.displayLoginError();
