@@ -42,20 +42,33 @@ const account = (() => {
         request.onload = function() {
             // If email and password are found
             if (request.status == 200) {
-
-                //let accountID = JSON.parse(this.response);
-                window.location.href = 'loggedIn.html';
-            // Else 
-            } else {
-                dom.displayLoginError();
-            }
+                let accountData = JSON.parse(this.response);
+                localStorage.setItem('accountID', accountData.id);
+                dom.userLoggedIn(accountData.userType);
+                return;
+            } 
         }
         request.send();
+        // If email and password not found
+        dom.displayLoginError();
     };
+
+    const getAccount = (callback) => {
+        let searchURL = url + `/${localStorage.getItem('accountID')}`;
+        let request = new XMLHttpRequest();
+        request.open('GET', searchURL);
+
+        request.onload = function() {
+            let accountData = JSON.parse(this.response);
+            callback(accountData);
+        }
+        request.send();
+    }
 
     return {
         createAccount,
         checkLogin,
+        getAccount,
     }
 })();
 

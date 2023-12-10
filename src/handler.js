@@ -35,6 +35,25 @@ const handler = (() => {
                 dom.displayLoginForm();
             }
 
+            // Sign out
+            if (e.target.classList.contains('signOutLink')) {
+                localStorage.removeItem('accountID');
+                dom.displayLoginForm();
+                dom.userLoggedOut();
+            }
+
+            // Sidebar links
+            if (e.target.classList.contains('select')) {
+                const displayLink = e.target.getAttribute('data-link');
+                dom.selectLink(e.target, displayLink);
+            }
+
+            if (
+                e.target.getAttribute('id') == 'car-owner' || 
+                e.target.getAttribute('id') == 'passenger') 
+            {
+                dom.toggleCarOwnerDOM(e.target.getAttribute('id'));
+            } 
         })
     }
 

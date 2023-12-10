@@ -141,18 +141,22 @@ func searchAccounts(w http.ResponseWriter, r *http.Request) {
 	passwordStr := querystringmap.Get("password")
 
 	if value := emailStr; len(value) > 0 {
-		id, found := checkLoginCredentials(emailStr, passwordStr)
+		id, userType, found := checkLoginCredentials(emailStr, passwordStr)
 
 		if !found {
+			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "No accounts found")
 		} else {
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(id)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":       id,
+				"userType": userType,
+			})
 		}
 	} else {
 		coursesWrapper := struct {
 			Courses map[string]Account `json:"Accounts"`
-		}{getCourses()}
+		}{getAccounts()}
 		json.NewEncoder(w).Encode(coursesWrapper)
 		return
 	}
@@ -170,7 +174,7 @@ func isExist(id string) (Account, bool) {
 	return a, true
 }
 
-func getCourses() map[string]Account {
+func getAccounts() map[string]Account {
 	results, err := db.Query("SELECT * FROM accounts")
 	if err != nil {
 		panic(err.Error())
@@ -218,24 +222,24 @@ func delAccount(id string) (int64, error) {
 	return result.RowsAffected()
 }
 
-func checkLoginCredentials(email string, password string) (string, bool) {
-	var id string
+func checkLoginCredentials(email string, password string) (string, string, bool) {
+	var id, userType string
 
-	results, err := db.Query("SELECT ID FROM accounts WHERE Email=? AND Password=?", email, password)
+	results, err := db.Query("SELECT ID, UserType FROM accounts WHERE Email=? AND Password=?", email, password)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	if results.Next() {
-		err = results.Scan(&id)
+		err = results.Scan(&id, &userType)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		return id, true
+		return id, userType, true
 	}
 
-	return "", false
+	return "", "", false
 }
 
 func getLastAccountIndex() string {
