@@ -49,8 +49,42 @@ const dom = (() => {
                 "Car Plate Number": "",
                 "Password": passwordInputValue
             }
-            return accountData;
-            
+            return accountData;  
+        }
+        else if (action == 'update') {
+            const firstNameInputValue = document.querySelector('#firstName').value;
+            const lastNameInputValue = document.querySelector('#lastName').value;
+            const mobileNoInputValue = document.querySelector('#mobileNo').value;
+            const emailInputValue = document.querySelector('#email').value;
+            const passwordInputValue= document.querySelector('#password').value;
+            const userTypeInputvalue = document.querySelector('input[name="selectUserType"]:checked').value;
+            let driverLicenseInputValue = "";
+            let carPlateInputValue = "";
+
+            // If car owner radio is selected, retrieve the car owner form inputs
+            if (document.querySelector('.carOwnerSelection')) {
+                driverLicenseInputValue = document.querySelector('#driverLicenseNumber').value;
+                carPlateInputValue = document.querySelector('#carPlateNumber').value;
+            }
+
+            // If passenger, remove driver license number & car plate number
+            if (userTypeInputvalue == 'passenger') {
+                driverLicenseInputValue = "";
+                carPlateInputValue = "";
+            }
+
+            // Create JSON
+            let accountData = {
+                "First Name": firstNameInputValue,
+                "Last Name": lastNameInputValue,
+                "Mobile Number": mobileNoInputValue,
+                "Email Address": emailInputValue,
+                "User Type": userTypeInputvalue,
+                "Driver License Number": driverLicenseInputValue,
+                "Car Plate Number": carPlateInputValue,
+                "Password": passwordInputValue
+            }
+            return accountData;  
         }
     }
 
@@ -145,11 +179,14 @@ const dom = (() => {
         `;
     }
 
-    const userLoggedIn = (userType) => {
-        document.querySelector('.header-elements').style.justifyContent = 'space-between';
+    const userLoggedIn = () => {
+        // Get user type from local storage
+        const userType = localStorage.getItem('userType');
 
+        document.querySelector('.header-elements').style.justifyContent = 'space-between';
         hamburger.classList.remove('hide');
         signOutLink.classList.remove('hide');
+
         if (userType == 'passenger') {
             content.innerHTML = `
             passenger 
@@ -164,12 +201,14 @@ const dom = (() => {
 
     const userLoggedOut = () => {
         document.querySelector('.header-elements').style.justifyContent = 'center';
-
         hamburger.classList.add('hide');
         signOutLink.classList.add('hide');
     }
 
     const selectLink = (target, destination) => {
+        // Get user type from local storage
+        const userType = localStorage.getItem('userType');
+
         const links = document.querySelectorAll(".link");
         links.forEach((link) => {
             link.classList.remove("active-link");
@@ -184,11 +223,20 @@ const dom = (() => {
             target.parentElement.classList.add("active-link");
         }
 
-        if (destination == 'profile') {
+        // Click on home
+        if (destination == 'home') {
+            displayHome(userType);
+        } 
+        // Click on view profile
+        else if (destination == 'profile') {
             account.getAccount((accountData) => {
                 displayProfile(accountData);
             }); 
         }
+    }
+
+    const displayHome = (userType) => {
+        
     }
 
     const displayProfile = (account) => {
@@ -255,14 +303,24 @@ const dom = (() => {
                 </div>
 
                 <button class="btn updateBtn">Update</button>
+                <button class="btn delBtn">Delete Account</button>
             </form>
+
+            <div class="deleteModal">
+                <p>Are you sure you want to delete?</p>
+                <div class="delActionBtns">
+                    <button class="btn confirmDelBtn">Confirm</button>
+                    <button class="btn cancelDelBtn">Cancel</button>
+                </div>
+            </div>
+            <div class="overlay">
         `;
 
         const passengerRadio = document.querySelector('#passenger');
         const carOwnerRadio = document.querySelector('#car-owner');
 
         if (account['User Type'] == 'passenger') {
-            passengerRadio.classList.add('checked');
+            passengerRadio.setAttribute('checked', 'checked');
         }
         else if (account['User Type'] == 'car owner') {
             carOwnerRadio.setAttribute('checked', 'checked');
@@ -282,6 +340,25 @@ const dom = (() => {
         }
     }
 
+    const displayUpdateMessage = (outcome) => {
+        if (outcome == 'success') {
+            content.innerHTML = `Your details have been updated`;
+        }
+        else {
+            content.innerHTML = `Error updating account details.`;
+        }
+    }
+
+    const displayDeleteModal = () => {
+        document.querySelector('.deleteModal').classList.add('active');
+        document.querySelector('.overlay').classList.add('active');
+    }
+
+    const closeDeleteModal = () => {
+        document.querySelector('.deleteModal').classList.remove('active');
+        document.querySelector('.overlay').classList.remove('active');
+    }
+
     return {
         toggleSidebar,
         getFormInputs,
@@ -292,6 +369,9 @@ const dom = (() => {
         userLoggedOut,
         selectLink,
         toggleCarOwnerDOM,
+        displayUpdateMessage,
+        displayDeleteModal,
+        closeDeleteModal,
     }
 
 })();

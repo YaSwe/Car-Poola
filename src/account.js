@@ -44,7 +44,8 @@ const account = (() => {
             if (request.status == 200) {
                 let accountData = JSON.parse(this.response);
                 localStorage.setItem('accountID', accountData.id);
-                dom.userLoggedIn(accountData.userType);
+                localStorage.setItem('userType', accountData.userType);
+                dom.userLoggedIn();
                 return;
             } 
         }
@@ -65,10 +66,34 @@ const account = (() => {
         request.send();
     }
 
+    const updateAccount = (accountData) => {
+        const accountID = localStorage.getItem('accountID');
+        let updateURL = url + "/" + accountID;
+
+        console.log(JSON.stringify(accountData));
+         
+        let request = new XMLHttpRequest();
+        request.open('PUT', updateURL);
+
+        request.onload = function() {
+            if (request.status == 200) {
+                // Store new user type to local storage
+                localStorage.setItem('userType', accountData['User Type']);
+                // Display account update success
+                dom.displayUpdateMessage('success');
+                return;
+            } 
+        }
+        request.send(JSON.stringify(accountData));
+        // Display error
+        dom.displayUpdateMessage('error');
+    }
+
     return {
         createAccount,
         checkLogin,
         getAccount,
+        updateAccount,
     }
 })();
 
