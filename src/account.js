@@ -23,15 +23,12 @@ const account = (() => {
         request.onload = function() {
             if (request.status == 201) {
                 // Display account creation success
-                console.log("success")
-            } else if (request.status == 409) {
-                // Display account exist error
-                console.log("error")
-            } else {
-                //dom.displayMessage('error', '');
-            }
+                dom.displayMessage('create', 'success');
+                return;
+            } 
         }
         request.send(JSON.stringify(accountData));
+        dom.displayMessage('create', 'error');
     }
 
     const checkLogin = (email, password) => {
@@ -80,13 +77,13 @@ const account = (() => {
                 // Store new user type to local storage
                 localStorage.setItem('userType', accountData['User Type']);
                 // Display account update success
-                dom.displayUpdateMessage('success');
+                dom.displayMessage('update', 'success');
                 return;
             } 
         }
         request.send(JSON.stringify(accountData));
         // Display error
-        dom.displayUpdateMessage('error');
+        dom.displayMessage('update', 'error');
     }
 
     return {

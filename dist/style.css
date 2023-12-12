@@ -247,17 +247,16 @@ input:not(:placeholder-shown) + .label label {
     margin-top: 2rem;
 }
 
-.displaySignUp, .displayLogin {
+.underline {
     text-decoration: underline;
     color: var(--dark-blue);
     margin-left: 2px;
     cursor: pointer;
 }
 
-.displaySignUp:hover, .displayLogin:hover {
+.underline:hover {
     color: var(--light-blue);
 }
-
 
 .error-text {
     color: var(--light-red);
@@ -271,6 +270,13 @@ input:not(:placeholder-shown) + .label label {
 .loginError {
     font-weight: 600;
     margin-top: 3rem;
+}
+
+/* Sign up message */
+
+.signUpMessage {
+    display: flex;
+    justify-content: center;
 }
 
 /* Update account form */
