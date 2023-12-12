@@ -145,7 +145,7 @@ const dom = (() => {
                 </div>
 
                 <button class="btn signUpBtn">Create Account</button>
-                <div class="loginLink">Have an account?<span class="displayLogin">Log in here</span></div>
+                <div class="loginLink">Have an account?<span class="underline displayLogin">Log in here</span></div>
             </form>
         `;
     }
@@ -174,7 +174,7 @@ const dom = (() => {
 
                 <button class="btn loginBtn">Sign In</button>
                 <div class="error-text loginError hide">Invalid login credentials. Please try again.</div>
-                <div class="signUpLink">Don't have an account?<span class="displaySignUp">Click here</span></div>
+                <div class="signUpLink">Don't have an account?<span class="underline displaySignUp">Sign up here</span></div>
             </form>
         `;
     }
@@ -340,11 +340,28 @@ const dom = (() => {
         }
     }
 
-    const displayUpdateMessage = (outcome) => {
-        if (outcome == 'success') {
+    const displayMessage = (type, outcome) => {
+        if (type == 'create' && outcome == 'success') {
+            content.innerHTML = `
+                <div class="signUpMessage">
+                    <p>Successfully created account</p>
+                    <p class="underline returnLogin">Return to sign in</p>
+                </div>
+            `;
+        }
+        else if (type == 'create' && outcome == 'error') {
+            content.innerHTML = `
+                <div class="signUpMessage">
+                    <p>Registration error. Try again</p>
+                    <p class="underline returnSignUp">Return</p>
+                </div>
+            `;
+        }
+        
+        if (type == 'update' && outcome == 'success') {
             content.innerHTML = `Your details have been updated`;
         }
-        else {
+        else if (type == 'update' && outcome == 'error') {
             content.innerHTML = `Error updating account details.`;
         }
     }
@@ -369,7 +386,7 @@ const dom = (() => {
         userLoggedOut,
         selectLink,
         toggleCarOwnerDOM,
-        displayUpdateMessage,
+        displayMessage,
         displayDeleteModal,
         closeDeleteModal,
     }
