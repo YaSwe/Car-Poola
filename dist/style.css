@@ -398,6 +398,8 @@ input:not(:placeholder-shown) + .label label {
 
 .search-container ion-icon {
     font-size: 1.4rem;
+    cursor: pointer;
+    padding: 5px;
 }
 
 .ridesList {
@@ -418,6 +420,7 @@ input:not(:placeholder-shown) + .label label {
     border-radius: 1.2rem;
     border: 1px solid var(--light-grey);
     transition: transform ease-in-out 0.3s;
+    margin-bottom: 2rem;
 }
 
 .ride-container:hover {
@@ -438,6 +441,7 @@ input:not(:placeholder-shown) + .label label {
     color: var(--dark-blue);
     margin-left: 5px;
 }
+
 
 /* Buttons */
 .btn {

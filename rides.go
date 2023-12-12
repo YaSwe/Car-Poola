@@ -122,27 +122,16 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 
 func SearchRides(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
-	pickupStr := querystringmap.Get("pickup")
 	destinationStr := querystringmap.Get("destination")
 
-	if value := pickupStr; len(value) > 0 {
-		results, found := searchByPickUp(value)
+	if value := destinationStr; len(value) > 0 {
+		results, found := searchByDestination(destinationStr)
 
 		if !found {
 			fmt.Fprintf(w, "No ride found")
 		} else {
 			json.NewEncoder(w).Encode(struct {
-				Results map[string]Ride `json:"Search Results"`
-			}{results})
-		}
-	} else if value = destinationStr; len(value) > 0 {
-		results, found := searchByDestination(value)
-
-		if !found {
-			fmt.Fprintf(w, "No ride found")
-		} else {
-			json.NewEncoder(w).Encode(struct {
-				Results map[string]Ride `json:"Search Results"`
+				Rides map[string]Ride `json:"Rides"`
 			}{results})
 		}
 	} else {
@@ -168,7 +157,7 @@ func isRideExist(id string) (Ride, bool) {
 }
 
 func getRides() map[string]Ride {
-	results, err := db.Query("SELECT StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt FROM rides")
+	results, err := db.Query("SELECT * FROM rides")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -180,7 +169,7 @@ func getRides() map[string]Ride {
 		var id string
 		var completedAt, cancelledAt sql.NullString
 
-		err := results.Scan(&r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity, &r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
+		err := results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity, &r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -238,11 +227,22 @@ func searchByPickUp(query string) (map[string]Ride, bool) {
 	for results.Next() {
 		var r Ride
 		var id string
+		var completedAt, cancelledAt sql.NullString
+
 		err = results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-			&r.NumPassengers, &r.Status, &r.CompletedAt, &r.CancelledAt)
+			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
 		if err != nil {
 			panic(err.Error())
 		}
+
+		// Handle null values
+		if completedAt.Valid {
+			r.CompletedAt = completedAt.String
+		}
+		if cancelledAt.Valid {
+			r.CancelledAt = cancelledAt.String
+		}
+
 		rides[id] = r
 	}
 
@@ -264,11 +264,22 @@ func searchByDestination(query string) (map[string]Ride, bool) {
 	for results.Next() {
 		var r Ride
 		var id string
+		var completedAt, cancelledAt sql.NullString
+
 		err = results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-			&r.NumPassengers, &r.Status, &r.CompletedAt, &r.CancelledAt)
+			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
 		if err != nil {
 			panic(err.Error())
 		}
+
+		// Handle null values
+		if completedAt.Valid {
+			r.CompletedAt = completedAt.String
+		}
+		if cancelledAt.Valid {
+			r.CancelledAt = cancelledAt.String
+		}
+
 		rides[id] = r
 	}
 

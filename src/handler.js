@@ -1,5 +1,6 @@
 import dom from './dom';
 import account from './account';
+import ride from './ride';
 
 const handler = (() => {
 
@@ -83,6 +84,14 @@ const handler = (() => {
             // Close delete account modal
             if (e.target.classList.contains('cancelDelBtn')) {
                 dom.closeDeleteModal();
+            }
+
+            // Submit search bar input
+            if (e.target.getAttribute('id') == 'submitSearch') {
+                let searchbarInput = dom.getSearchbarInput();
+                ride.searchRide(searchbarInput, (rideData) => {
+                    dom.displayTrips(rideData);
+                });
             }
 
         })
