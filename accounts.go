@@ -7,7 +7,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -22,26 +21,7 @@ type Account struct {
 	Password            string `json:"Password"`
 }
 
-var (
-	db  *sql.DB
-	err error
-)
-
-func main() {
-	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/carpoola")
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/accounts/{accountID}", account).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
-	router.HandleFunc("/api/v1/accounts", searchAccounts)
-	fmt.Println("Listening at port 8000")
-	log.Fatal(http.ListenAndServe(":8000", router))
-}
-
-func account(w http.ResponseWriter, r *http.Request) {
+func HandleAccountRequest(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	accountID := params["accountID"]
 
@@ -59,7 +39,7 @@ func account(w http.ResponseWriter, r *http.Request) {
 			// Get the last account ID
 			accountID := getLastAccountIndex()
 
-			if _, ok := isExist(accountID); !ok {
+			if _, ok := isAccountExist(accountID); !ok {
 				insertAccount(accountID, data)
 				w.WriteHeader(http.StatusCreated)
 			} else {
@@ -74,7 +54,7 @@ func account(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "PUT" {
 		var data Account
 		if err := json.Unmarshal(body, &data); err == nil {
-			if _, ok := isExist(accountID); ok {
+			if _, ok := isAccountExist(accountID); ok {
 				updateAccount(accountID, data)
 				w.WriteHeader(http.StatusOK)
 			} else {
@@ -90,7 +70,7 @@ func account(w http.ResponseWriter, r *http.Request) {
 		var data map[string]interface{}
 
 		if err := json.Unmarshal(body, &data); err == nil {
-			if orig, ok := isExist(accountID); ok {
+			if orig, ok := isAccountExist(accountID); ok {
 				for k, v := range data {
 					switch k {
 					case "First Name":
@@ -120,7 +100,7 @@ func account(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// If account exists
-	} else if val, ok := isExist(accountID); ok {
+	} else if val, ok := isAccountExist(accountID); ok {
 		// Delete account
 		if r.Method == "DELETE" {
 			delAccount(accountID)
@@ -135,7 +115,7 @@ func account(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func searchAccounts(w http.ResponseWriter, r *http.Request) {
+func SearchAccounts(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
 	emailStr := querystringmap.Get("email")
 	passwordStr := querystringmap.Get("password")
@@ -162,7 +142,7 @@ func searchAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isExist(id string) (Account, bool) {
+func isAccountExist(id string) (Account, bool) {
 	var a Account
 
 	result := db.QueryRow("SELECT * FROM accounts WHERE ID=?", id)
