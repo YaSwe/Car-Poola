@@ -21,8 +21,8 @@ const handler = (() => {
 
             // Signup Btn 
             if (e.target.classList.contains('signUpBtn')) {
-                let courseData = dom.getFormInputs('signUp');
-                account.createAccount(courseData);
+                let accountData = dom.getFormInputs('signUp');
+                account.createAccount(accountData);
             }
 
             // Display registration form
@@ -38,14 +38,15 @@ const handler = (() => {
             // Sign out
             if (e.target.classList.contains('signOutLink')) {
                 localStorage.removeItem('accountID');
+                localStorage.removeItem('userType');
                 dom.displayLoginForm();
                 dom.userLoggedOut();
             }
 
             // Sidebar links
             if (e.target.classList.contains('select')) {
-                const displayLink = e.target.getAttribute('data-link');
-                dom.selectLink(e.target, displayLink);
+                const destinationLink = e.target.getAttribute('data-link-destination');
+                dom.selectLink(e.target, destinationLink);
             }
 
             if (
@@ -54,6 +55,24 @@ const handler = (() => {
             {
                 dom.toggleCarOwnerDOM(e.target.getAttribute('id'));
             } 
+
+            if (e.target.classList.contains('updateBtn')) {
+                let accountData = dom.getFormInputs('update');
+                account.updateAccount(accountData);
+            }
+
+            if (e.target.classList.contains('delBtn')) {
+                e.preventDefault();
+                dom.displayDeleteModal();
+            }
+
+            if (e.target.classList.contains('confirmDelBtn')) {
+                //account.deleteAccount();
+            }
+
+            if (e.target.classList.contains('cancelDelBtn')) {
+                dom.closeDeleteModal();
+            }
         })
     }
 

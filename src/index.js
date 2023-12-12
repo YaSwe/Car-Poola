@@ -3,11 +3,9 @@ import dom from './dom';
 
 handler.handleClicks();
 
-const accountID = localStorage.getItem('accountID');
-
-if (!accountID) {
-    dom.displayLoginForm();
+// If not logged in, show login form
+if (localStorage.getItem('accountID')) {
+    dom.userLoggedIn();
 } 
-else {
-    dom.userLoggedIn('passenger');
-}
+
+
