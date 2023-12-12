@@ -168,7 +168,7 @@ func isRideExist(id string) (Ride, bool) {
 }
 
 func getRides() map[string]Ride {
-	results, err := db.Query("SELECT * FROM rides")
+	results, err := db.Query("SELECT StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt FROM rides")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -180,8 +180,7 @@ func getRides() map[string]Ride {
 		var id string
 		var completedAt, cancelledAt sql.NullString
 
-		err := results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
+		err := results.Scan(&r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity, &r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
 		if err != nil {
 			panic(err.Error())
 		}

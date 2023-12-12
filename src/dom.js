@@ -1,4 +1,5 @@
 import account from './account';
+import ride from './ride';
 
 const dom = (() => {
     const hamburger = document.querySelector('.hamburger');
@@ -188,9 +189,9 @@ const dom = (() => {
         signOutLink.classList.remove('hide');
 
         if (userType == 'passenger') {
-            content.innerHTML = `
-            passenger 
-            `;
+            ride.getRides((rides) => {
+                displayTrips(rides);
+            })
         } 
         else if (userType == 'car owner') {
             content.innerHTML = `
@@ -206,9 +207,6 @@ const dom = (() => {
     }
 
     const selectLink = (target, destination) => {
-        // Get user type from local storage
-        const userType = localStorage.getItem('userType');
-
         const links = document.querySelectorAll(".link");
         links.forEach((link) => {
             link.classList.remove("active-link");
@@ -224,8 +222,10 @@ const dom = (() => {
         }
 
         // Click on home
-        if (destination == 'home') {
-            displayHome(userType);
+        if (destination == 'rides') {
+            ride.getRides((rides) => {
+                displayTrips(rides);
+            })
         } 
         // Click on view profile
         else if (destination == 'profile') {
@@ -235,8 +235,36 @@ const dom = (() => {
         }
     }
 
-    const displayHome = (userType) => {
-        
+    const displayTrips = (data) => {
+        content.innerHTML = `
+        <div class="search-container">
+            <ion-icon name="search-outline"></ion-icon>
+            <input type="search" id="search-bar">
+        </div>
+        `;
+       
+        let keys = Object.keys(data.Rides);
+        keys.forEach((key) => {
+            content.innerHTML += `
+                <div class="ridesList">
+                    <div class="ride-container">
+                        <div class="left">
+                            <p>Ride started at: <span class="ride-info">${data.Rides[key]["Start Ride Time"]}</span></p>
+                            <p>Pick-up location: <span class="ride-info">${data.Rides[key]["Pick Up Location"]}</span></p>
+                            <p>Destination: <span class="ride-info">${data.Rides[key]["Destination Address"]}</span></p>
+                            <p>Capacity: <span class="ride-info">${data.Rides[key]["Passenger Capacity"]}</span></p>
+                            <p>Passengers: <span class="ride-info">${data.Rides[key]["NumPassengers"]}</span></p>
+                        </div>
+                        <div class="right">
+                            <p>Completed at: <span class="ride-info">${data.Rides[key]["Completed At"]}</span></p>
+                            <p>Cancelled at: <span class="ride-info">${data.Rides[key]["Cancelled At"]}</span></p>
+                            <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
+                            <button class="btn enrolBtn">Enrol</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     const displayProfile = (account) => {
