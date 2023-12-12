@@ -238,33 +238,37 @@ const dom = (() => {
     const displayTrips = (data) => {
         content.innerHTML = `
         <div class="search-container">
-            <ion-icon name="search-outline"></ion-icon>
+            <ion-icon name="search-outline" id="submitSearch"></ion-icon>
             <input type="search" id="search-bar">
         </div>
+        <div class="ridesList"></div>
         `;
-       
+
         let keys = Object.keys(data.Rides);
         keys.forEach((key) => {
-            content.innerHTML += `
-                <div class="ridesList">
-                    <div class="ride-container">
-                        <div class="left">
-                            <p>Ride started at: <span class="ride-info">${data.Rides[key]["Start Ride Time"]}</span></p>
-                            <p>Pick-up location: <span class="ride-info">${data.Rides[key]["Pick Up Location"]}</span></p>
-                            <p>Destination: <span class="ride-info">${data.Rides[key]["Destination Address"]}</span></p>
-                            <p>Capacity: <span class="ride-info">${data.Rides[key]["Passenger Capacity"]}</span></p>
-                            <p>Passengers: <span class="ride-info">${data.Rides[key]["NumPassengers"]}</span></p>
-                        </div>
-                        <div class="right">
-                            <p>Completed at: <span class="ride-info">${data.Rides[key]["Completed At"]}</span></p>
-                            <p>Cancelled at: <span class="ride-info">${data.Rides[key]["Cancelled At"]}</span></p>
-                            <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
-                            <button class="btn enrolBtn">Enrol</button>
-                        </div>
+            document.querySelector('.ridesList').innerHTML += `
+                <div class="ride-container">
+                    <div class="left">
+                        <p>Ride started at: <span class="ride-info">${data.Rides[key]["Start Ride Time"]}</span></p>
+                        <p>Pick-up location: <span class="ride-info">${data.Rides[key]["Pick Up Location"]}</span></p>
+                        <p>Destination: <span class="ride-info">${data.Rides[key]["Destination Address"]}</span></p>
+                        <p>Capacity: <span class="ride-info">${data.Rides[key]["Passenger Capacity"]}</span></p>
+                        <p>Passengers: <span class="ride-info">${data.Rides[key]["NumPassengers"]}</span></p>
+                    </div>
+                    <div class="right">
+                        <p>Completed at: <span class="ride-info">${data.Rides[key]["Completed At"]}</span></p>
+                        <p>Cancelled at: <span class="ride-info">${data.Rides[key]["Cancelled At"]}</span></p>
+                        <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
+                        <button class="btn enrolBtn">Enrol</button>
                     </div>
                 </div>
             `;
-        });
+        }); 
+    }
+
+    const getSearchbarInput = () => {
+        const searchBarInputValue = document.querySelector('#search-bar').value;
+        return searchBarInputValue;
     }
 
     const displayProfile = (account) => {
@@ -417,6 +421,8 @@ const dom = (() => {
         displayMessage,
         displayDeleteModal,
         closeDeleteModal,
+        getSearchbarInput,
+        displayTrips,
     }
 
 })();
