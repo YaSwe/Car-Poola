@@ -156,10 +156,11 @@ html {
 
 .content {
     display: grid;
+    grid-template-rows: auto 1fr;
     justify-items: center;
-    align-items: center;
     min-height: 100vh;
     transition: background-color 250ms;
+    padding-top: 70px;
 }
 
 .content.active {
@@ -373,6 +374,71 @@ input:not(:placeholder-shown) + .label label {
     display: block;
 }
 
+/* Rides */
+
+.search-container {
+    gap: 5px;
+    position: relative;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    margin-top: 3rem;
+}
+
+#search-bar {
+    border: none;
+    background-color: #cbd5e1;
+    padding: 3px 8px 3px 10px;
+    width: 300px;
+    height: 18px;
+    border-radius: 1.2rem;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-container ion-icon {
+    font-size: 1.4rem;
+}
+
+.ridesList {
+    margin-top: 2rem;
+}
+
+.ridesList p {
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.ride-container {
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--light-grey);
+    padding: 2rem;
+    width: 800px;
+    border-radius: 1.2rem;
+    border: 1px solid var(--light-grey);
+    transition: transform ease-in-out 0.3s;
+}
+
+.ride-container:hover {
+    border: 1px solid var(--light-blue);
+    transform: scale(1.01);
+}
+
+.left {
+    width: 70%;
+}
+
+.right {
+    width: 30%;
+}
+
+.ride-info {
+    font-weight: 600;
+    color: var(--dark-blue);
+    margin-left: 5px;
+}
+
 /* Buttons */
 .btn {
     border: none;
@@ -380,14 +446,11 @@ input:not(:placeholder-shown) + .label label {
     border-radius: 0.5rem;
     cursor: pointer;
     transition: .3s;
-}
-
-.signUpBtn, .loginBtn, .updateBtn {
     background-color: var(--light-blue);
     color: var(--white);
 }
 
-.signUpBtn:hover, .loginBtn:hover, .updateBtn:hover {
+.btn:hover {
     background-color: var(--dark-blue);
 }
 
@@ -399,6 +462,10 @@ input:not(:placeholder-shown) + .label label {
 
 .delBtn:hover {
     background-color: var(--red);
+}
+
+.enrolBtn {
+    margin-top: 2rem;
 }
 
 .hide {
