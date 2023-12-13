@@ -13,14 +13,13 @@ const ride = (() => {
     }
 
     const searchRide = (searchInput, callback) => {
-        let searchURL = url + `?destination=${searchInput}`;
+        let searchURL = url + `?search=${searchInput}`;
         let request = new XMLHttpRequest();
         request.open('GET', searchURL);
     
         request.onload = function() {
             let rideData = JSON.parse(this.response);
             callback(rideData);
-            console.log(rideData);
         }
         request.send();
     }
