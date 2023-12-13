@@ -122,10 +122,10 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 
 func SearchRides(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
-	destinationStr := querystringmap.Get("destination")
+	searchQuery := querystringmap.Get("search")
 
-	if value := destinationStr; len(value) > 0 {
-		results, found := searchByDestination(destinationStr)
+	if value := searchQuery; len(value) > 0 {
+		results, found := searchByDestinationAndPickUp(searchQuery)
 
 		if !found {
 			fmt.Fprintf(w, "No ride found")
@@ -216,45 +216,8 @@ func delRide(id string) (int64, error) {
 	return result.RowsAffected()
 }
 
-func searchByPickUp(query string) (map[string]Ride, bool) {
-	results, err := db.Query("SELECT * FROM rides WHERE LOWER(PickUpLocation) LIKE LOWER(?)", "%"+query+"%")
-	if err != nil {
-		panic(err.Error())
-	}
-
-	var rides map[string]Ride = map[string]Ride{}
-
-	for results.Next() {
-		var r Ride
-		var id string
-		var completedAt, cancelledAt sql.NullString
-
-		err = results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		// Handle null values
-		if completedAt.Valid {
-			r.CompletedAt = completedAt.String
-		}
-		if cancelledAt.Valid {
-			r.CancelledAt = cancelledAt.String
-		}
-
-		rides[id] = r
-	}
-
-	if len(rides) == 0 {
-		return rides, false
-	}
-
-	return rides, true
-}
-
-func searchByDestination(query string) (map[string]Ride, bool) {
-	results, err := db.Query("SELECT * FROM rides WHERE LOWER(DestinationAddress) LIKE LOWER(?)", "%"+query+"%")
+func searchByDestinationAndPickUp(query string) (map[string]Ride, bool) {
+	results, err := db.Query("SELECT * FROM rides WHERE LOWER(DestinationAddress) LIKE LOWER(?) OR LOWER(PickUpLocation) LIKE LOWER(?)", "%"+query+"%", "%"+query+"%")
 	if err != nil {
 		panic(err.Error())
 	}
