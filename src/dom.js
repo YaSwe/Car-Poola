@@ -38,6 +38,7 @@ const dom = (() => {
             const mobileNoInputValue = document.querySelector('#mobileNo').value;
             const emailInputValue = document.querySelector('#email').value;
             const passwordInputValue= document.querySelector('#password').value;
+            const currentDate = new Date().toISOString; // Get current date in ISO format
             
             // Create JSON
             let accountData = {
@@ -48,7 +49,8 @@ const dom = (() => {
                 "User Type": 'passenger',
                 "Driver License Number": "",
                 "Car Plate Number": "",
-                "Password": passwordInputValue
+                "Password": passwordInputValue,
+                "Created At": currentDate
             }
             return accountData;  
         }
@@ -201,6 +203,7 @@ const dom = (() => {
     }
 
     const userLoggedOut = () => {
+        // Change the DOM when user logs out
         document.querySelector('.header-elements').style.justifyContent = 'center';
         hamburger.classList.add('hide');
         signOutLink.classList.add('hide');
@@ -237,11 +240,11 @@ const dom = (() => {
 
     const displayTrips = (data) => {
         content.innerHTML = `
-        <div class="search-container">
-            <ion-icon name="search-outline" id="submitSearch"></ion-icon>
-            <input type="search" id="search-bar">
-        </div>
-        <div class="ridesList"></div>
+            <div class="search-container">
+                <ion-icon name="search-outline" id="submitSearch"></ion-icon>
+                <input type="search" id="search-bar">
+            </div>
+            <div class="ridesList"></div>
         `;
 
         let keys = Object.keys(data.Rides);
@@ -335,6 +338,8 @@ const dom = (() => {
                 </div>
 
                 <button class="btn updateBtn">Update</button>
+                <p>Account created at: <span class="accCreatedDate">${account['Created At']}</span></p>
+                <p class="delAccNote">Note: You can only delete account if it is a year old</p>
                 <button class="btn delBtn">Delete Account</button>
             </form>
 
@@ -375,7 +380,7 @@ const dom = (() => {
     const displayMessage = (type, outcome) => {
         if (type == 'create' && outcome == 'success') {
             content.innerHTML = `
-                <div class="signUpMessage">
+                <div class="outcome-message signUpMessage">
                     <p>Successfully created account</p>
                     <p class="underline returnLogin">Return to sign in</p>
                 </div>
@@ -383,7 +388,7 @@ const dom = (() => {
         }
         else if (type == 'create' && outcome == 'error') {
             content.innerHTML = `
-                <div class="signUpMessage">
+                <div class="outcome-message signUpMessage">
                     <p>Registration error. Try again</p>
                     <p class="underline returnSignUp">Return</p>
                 </div>
@@ -391,10 +396,17 @@ const dom = (() => {
         }
         
         if (type == 'update' && outcome == 'success') {
-            content.innerHTML = `Your details have been updated`;
+            content.innerHTML = `<p class="outcome-message">Your details have been updated</p>`;
         }
         else if (type == 'update' && outcome == 'error') {
-            content.innerHTML = `Error updating account details.`;
+            content.innerHTML = `<p class="outcome-message">Error updating account details</p>`;
+        }
+
+        if (type == 'delete' && outcome == 'success') {
+            content.innerHTML = '<p class="outcome-message">Your account has been deleted</p>';
+        }
+        else if (type == 'delete' && outcome == 'error') {
+            content.innerHTML = '<p class="outcome-message">Account is less than a year old</p>'
         }
     }
 

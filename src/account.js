@@ -1,16 +1,5 @@
 import dom from './dom';
 
-const Account = (accountID, firstName, lastName, mobileNo, email, driverLicenseNumber, carPlateNumber, password) => {
-    this.accountID = accountID;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.mobileNo = mobileNo;
-    this.email = email;
-    this.driverLicenseNumber = driverLicenseNumber;
-    this.carPlateNumber = carPlateNumber;
-    this.password = password;
-}
-
 const account = (() => {
     let url = 'http://localhost:8000/api/v1/accounts';
 
@@ -66,8 +55,6 @@ const account = (() => {
     const updateAccount = (accountData) => {
         const accountID = localStorage.getItem('accountID');
         let updateURL = url + "/" + accountID;
-
-        console.log(JSON.stringify(accountData));
          
         let request = new XMLHttpRequest();
         request.open('PUT', updateURL);
@@ -86,11 +73,40 @@ const account = (() => {
         dom.displayMessage('update', 'error');
     }
 
+    const deleteAccount = () => {
+        const accountID = localStorage.getItem('accountID');
+        let deleteURL = url + "/" + accountID;
+        
+        let request = new XMLHttpRequest();
+        request.open('DELETE', deleteURL);
+
+        request.onload = function() {
+            if (request.status == 200) {
+                // Remove the account ID and user type in local storage
+                localStorage.removeItem('accountID');
+                localStorage.removeItem('userType');
+
+                // Display account deletion success
+                dom.displayMessage('delete', 'success');
+                setTimeout(() => {
+                    // 5 second delay and return to login form
+                    dom.displayLoginForm();
+                    dom.userLoggedOut();
+                }, 5000);
+                return;
+            } 
+        }
+        request.send();
+        // Display error
+        dom.displayMessage('delete', 'error');
+    }
+
     return {
         createAccount,
         checkLogin,
         getAccount,
         updateAccount,
+        deleteAccount,
     }
 })();
 
