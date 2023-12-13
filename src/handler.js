@@ -78,7 +78,8 @@ const handler = (() => {
 
             // Confirm delete account in modal
             if (e.target.classList.contains('confirmDelBtn')) {
-                //account.deleteAccount();
+                // Delete account with retrieved local storage account ID
+                account.deleteAccount();
             }
 
             // Close delete account modal
@@ -93,7 +94,6 @@ const handler = (() => {
                     dom.displayTrips(rideData);
                 });
             }
-
         })
     }
 

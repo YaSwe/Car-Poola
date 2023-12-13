@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Account struct {
@@ -19,6 +20,7 @@ type Account struct {
 	DriverLicenseNumber string `json:"Driver License Number"`
 	CarPlateNumber      string `json:"Car Plate Number"`
 	Password            string `json:"Password"`
+	CreatedAt           string `json:"Created At"`
 }
 
 func HandleAccountRequest(w http.ResponseWriter, r *http.Request) {
@@ -144,11 +146,17 @@ func SearchAccounts(w http.ResponseWriter, r *http.Request) {
 
 func isAccountExist(id string) (Account, bool) {
 	var a Account
+	var createdAt sql.NullString
 
 	result := db.QueryRow("SELECT * FROM accounts WHERE ID=?", id)
-	err := result.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
+	err := result.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password, &createdAt)
 	if err == sql.ErrNoRows {
 		return a, false
+	}
+
+	// Handle null values
+	if createdAt.Valid {
+		a.CreatedAt = createdAt.String
 	}
 
 	return a, true
@@ -165,9 +173,16 @@ func getAccounts() map[string]Account {
 	for results.Next() {
 		var a Account
 		var id string
-		err := results.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password)
+		var createdAt sql.NullString
+
+		err := results.Scan(&id, &a.FirstName, &a.LastName, &a.MobileNumber, &a.EmailAddress, &a.UserType, &a.DriverLicenseNumber, &a.CarPlateNumber, &a.Password, &createdAt)
 		if err != nil {
 			panic(err.Error())
+		}
+
+		// Handle null values
+		if createdAt.Valid {
+			a.CreatedAt = createdAt.String
 		}
 
 		accounts[id] = a
@@ -194,11 +209,21 @@ func updateAccount(id string, a Account) {
 	}
 }
 
+// Delete account that is more than a year old
 func delAccount(id string) (int64, error) {
-	result, err := db.Exec("DELETE from accounts WHERE ID=?", id)
+	// Delete rides with rider ID foreign key
+	_, err = db.Exec("DELETE FROM rides WHERE RiderID = ?", id)
 	if err != nil {
 		return 0, err
 	}
+
+	// Delete account with account ID
+	oneYearAgo := time.Now().AddDate(-1, 0, 0)
+	result, err := db.Exec("DELETE from accounts WHERE ID=? AND CreatedAt <= ?", id, oneYearAgo)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Print(result.RowsAffected())
 	return result.RowsAffected()
 }
 

@@ -156,11 +156,11 @@ html {
 
 .content {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr;
     justify-items: center;
+    align-items: center;
     min-height: 100vh;
     transition: background-color 250ms;
-    padding-top: 70px;
 }
 
 .content.active {
@@ -185,8 +185,8 @@ html {
     border-radius: 0.8rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 70px;
+    align-items: center; 
+    margin: 100px 0 60px 0;
 }
 
 .accountForm h2 {
@@ -280,7 +280,7 @@ input:not(:placeholder-shown) + .label label {
     justify-content: center;
 }
 
-/* Update account form */
+/* Update profile */
 
 .userTypeSelection {
     width: fit-content;
@@ -290,7 +290,6 @@ input:not(:placeholder-shown) + .label label {
     display: flex;
     flex-direction: row;
     flex-wrap: no-wrap;
-    margin-bottom: 4rem;
 }
 
 .userTypeSelection input { display: none; }
@@ -316,6 +315,13 @@ input:not(:placeholder-shown) + .label label {
     background: var(--cyan);
 }
 
+.delAccNote {
+    color: var(--light-red);
+    font-weight: 600;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
 /* Delete Account Modal */
 
 .deleteModal {
@@ -338,21 +344,13 @@ input:not(:placeholder-shown) + .label label {
 .deleteModal p {
     color: var(--light-red);
     font-size: 12px;
+    margin-bottom: 2rem;
+    font-weight: 600;
 }
 
 .delActioNBtns {
     display: flex;
     align-items: center;
-}
-
-.confirmDelBtn {
-    background-color: var(--light-red);
-    color: var(--white);
-}
-
-.cancelDelBtn {
-    background-color: var(--light-grey);
-    color: var(--dark-grey);
 }
 
 .deleteModal.active {
@@ -382,7 +380,7 @@ input:not(:placeholder-shown) + .label label {
     margin-bottom: 3rem;
     display: flex;
     align-items: center;
-    margin-top: 3rem;
+    margin-top: 120px;
 }
 
 #search-bar {
@@ -442,6 +440,11 @@ input:not(:placeholder-shown) + .label label {
     margin-left: 5px;
 }
 
+/* Outcome messages */
+
+.outcome-message {
+    margin-top: 100px;
+}
 
 /* Buttons */
 .btn {
@@ -458,8 +461,12 @@ input:not(:placeholder-shown) + .label label {
     background-color: var(--dark-blue);
 }
 
+.updateBtn {
+    margin: 3rem 0;
+}
+
 .delBtn {
-    margin-top: 3rem;
+    margin-top: 1rem;
     background-color: var(--light-red);
     color: var(--white);
 }
@@ -470,6 +477,25 @@ input:not(:placeholder-shown) + .label label {
 
 .enrolBtn {
     margin-top: 2rem;
+}
+
+.confirmDelBtn {
+    background-color: var(--light-red);
+    color: var(--white);
+}
+
+.confirmDelBtn:hover {
+    background-color: var(--red);
+}
+
+.cancelDelBtn {
+    background-color: var(--light-grey);
+    color: var(--dark-grey);
+}
+
+.cancelDelBtn:hover {
+    background-color: var(--dark-grey);
+    color: var(--white);
 }
 
 .hide {
