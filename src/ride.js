@@ -72,6 +72,13 @@ const ride = (() => {
             if (request.status == 201) {
                 // Display ride creation success
                 dom.displayMessage('publish', 'success');
+
+                setTimeout(() => {
+                    // 5 second delay and return to display all trips
+                    ride.getCarOwnerRides((rides) => {
+                        dom.displayAllCarOwnerRides(rides);
+                    })
+                }, 5000);
                 return;
             } 
         }
@@ -80,12 +87,52 @@ const ride = (() => {
         dom.displayMessage('publish', 'error');
     }
 
+    const delRide = (rideID) => {
+        let deleteURL = url + "/" + rideID;
+
+        let request = new XMLHttpRequest();
+        request.open('DELETE', deleteURL);
+
+        request.onload = function() {
+            if (request.status == 200) {
+                console.log("success")
+                return;
+            } 
+        }
+        request.send();
+        // Display error
+        console.log("failed")
+    }
+
+    const checkRideStartTime = (rideID, callback) => {
+        let searchURL = url + `?rideID=${rideID}`;
+        let request = new XMLHttpRequest();
+        request.open('GET', searchURL);
+    
+        request.onload = function() {
+            // If ride is 30 mins ago
+            if (request.status == 200) {
+                callback(true);
+            // If found
+            } else {
+                callback(false);
+            }
+        }
+        request.send();
+    }
+
+    const selectRidesTakenByPassenger = () => {
+        
+    }
+
     return {
         getRides,
         searchRide,
         updateRide,
         getCarOwnerRides,
-        createRide
+        createRide,
+        delRide,
+        checkRideStartTime,
     }
 })();
 

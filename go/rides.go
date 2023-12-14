@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"time"
 )
 
 type Ride struct {
@@ -122,6 +123,7 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
 	searchQuery := querystringmap.Get("search")
 	riderIDQuery := querystringmap.Get("riderID")
+	checkStartTimeQuery := querystringmap.Get("checkStartTime")
 
 	if value := searchQuery; len(value) > 0 {
 		results, found := searchByDestinationAndPickUp(searchQuery)
@@ -146,6 +148,20 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(struct {
 				Rides map[string]Ride `json:"Rides"`
 			}{results})
+		}
+	} else if value = checkStartTimeQuery; len(value) > 0 {
+		isThirtyMinsAgo, err := checkRideStartTime(checkStartTimeQuery)
+		if err != nil {
+			// Handle the error
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error occurred while checking ride start time")
+			return
+		}
+
+		if isThirtyMinsAgo {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "Ride started more than 30 minutes ago")
+			return
 		}
 	} else {
 		ridesWrapper := struct {
@@ -308,6 +324,18 @@ func searchByRiderID(query string) (map[string]Ride, bool) {
 	}
 
 	return rides, true
+}
+
+func checkRideStartTime(rideID string) (bool, error) {
+	var isThirtyMinsAgo int
+	thirtyMinutesAgo := time.Now().Add(-30 * time.Minute).Format("2006-01-02 15:04:05")
+
+	err := db.QueryRow("SELECT IF(StartRideTime < ?, 1, 0) AS IsThirtyMinsAgo FROM rides WHERE ID = ?", thirtyMinutesAgo, rideID).Scan(&isThirtyMinsAgo)
+	if err != nil {
+		return false, err
+	}
+
+	return isThirtyMinsAgo == 1, nil
 }
 
 func getLastRideIndex() string {

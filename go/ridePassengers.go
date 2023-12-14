@@ -106,8 +106,20 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 	rideQuery := querystringmap.Get("rideID")
 	passengerQuery := querystringmap.Get("passengerID")
 
-	if value := rideQuery; len(value) > 0 {
+	if value := passengerQuery; len(value) > 0 {
 		results, found := searchByPassenger(rideQuery, passengerQuery)
+
+		if !found {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "No ride found")
+		} else {
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(struct {
+				Rides map[string]RidePassengers `json:"Rides"`
+			}{results})
+		}
+	} else if value = rideQuery; len(value) > 0 {
+		results, found := searchRidesWithRideID(rideQuery)
 
 		if !found {
 			w.WriteHeader(http.StatusOK)
@@ -129,6 +141,33 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 
 func searchByPassenger(rideID string, passengerID string) (map[string]RidePassengers, bool) {
 	results, err := db.Query("SELECT * FROM ride_passengers WHERE RideID=? AND PassengerID=?", rideID, passengerID)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var rides map[string]RidePassengers = map[string]RidePassengers{}
+
+	for results.Next() {
+		var r RidePassengers
+		var id string
+
+		err = results.Scan(&id, &r.RideID, &r.PassengerID)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		rides[id] = r
+	}
+
+	if len(rides) == 0 {
+		return rides, false
+	}
+
+	return rides, true
+}
+
+func searchRidesWithRideID(rideID string) (map[string]RidePassengers, bool) {
+	results, err := db.Query("SELECT * FROM ride_passengers WHERE RideID=?", rideID)
 	if err != nil {
 		panic(err.Error())
 	}

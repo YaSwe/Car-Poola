@@ -356,7 +356,7 @@ const dom = (() => {
                         <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
                         <button class="btn startRideBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Start Ride</button>
                         <button class="btn cancelRideBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Cancel Ride</button>
-                        <p class="exceedMessage hide" data-link-id='${key}'>Ride is full</p>
+                        <p class="startTimeMessage hide" data-link-id='${key}'>Ride is not 30 mins ago</p>
                     </div>
                 </div>
             `;
@@ -532,6 +532,11 @@ const dom = (() => {
         message.classList.remove('hide');
     }
 
+    const displayStartTimeError = (rideID) => {
+        const message = document.querySelector(`.startTimeMessage[data-link-id="${rideID}"]`);
+        message.classList.remove('hide');
+    }
+
     const displayPublishRideForm = () => {
         content.innerHTML = `
             <form class="rideForm" action="#">
@@ -583,6 +588,7 @@ const dom = (() => {
         displayPassengerInRide,
         displayAllCarOwnerRides,
         displayPublishRideForm,
+        displayStartTimeError,
     }
 
 })();
