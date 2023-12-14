@@ -25,8 +25,11 @@ func main() {
 	router.HandleFunc("/api/v1/accounts/{accountID}", HandleAccountRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/accounts", SearchAccounts)
 
-	router.HandleFunc("/api/v1/rides/{rideID}/{riderID}", HandleRideRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/rides/{rideID}", HandleRideRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/rides", SearchRides)
+
+	router.HandleFunc("/api/v1/ridePassengers/{rideID}/{passengerID}", HandleRidePassengersRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/ridePassengers", SearchPassengerRides)
 
 	fmt.Println("Listening at port 8000")
 	log.Fatal(http.ListenAndServe(":8000", router))

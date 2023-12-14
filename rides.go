@@ -11,7 +11,7 @@ import (
 )
 
 type Ride struct {
-	RiderID            string `json:"RiderID"`
+	RiderID            string `json:"Rider ID"`
 	StartRideTime      string `json:"Start Ride Time"`
 	PickUpLocation     string `json:"Pick Up Location"`
 	DestinationAddress string `json:"Destination Address"`
@@ -25,6 +25,7 @@ type Ride struct {
 func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	rideID := params["rideID"]
+	riderID := params["riderID"]
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -34,7 +35,6 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Create ride
 	if r.Method == "POST" {
-		riderID := params["riderID"]
 		var data Ride
 
 		if err := json.Unmarshal(body, &data); err == nil {
@@ -64,7 +64,6 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
 				fmt.Fprintf(w, "Ride ID does not exist")
 			}
-
 		} else {
 			fmt.Println(err)
 		}
@@ -147,8 +146,8 @@ func isRideExist(id string) (Ride, bool) {
 	var r Ride
 
 	result := db.QueryRow("SELECT * FROM rides WHERE ID=?", id)
-	err := result.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-		&r.NumPassengers, &r.Status, &r.CompletedAt, &r.CancelledAt)
+	err := result.Scan(&id, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
+		&r.NumPassengers, &r.Status, &r.CompletedAt, &r.CancelledAt, &r.RiderID)
 	if err == sql.ErrNoRows {
 		return r, false
 	}
@@ -169,7 +168,7 @@ func getRides() map[string]Ride {
 		var id string
 		var completedAt, cancelledAt sql.NullString
 
-		err := results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity, &r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
+		err := results.Scan(&id, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity, &r.NumPassengers, &r.Status, &completedAt, &cancelledAt, &r.RiderID)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -188,23 +187,31 @@ func getRides() map[string]Ride {
 	return rides
 }
 
-func insertRide(id string, riderId string, r Ride) {
+func insertRide(id string, riderID string, r Ride) {
 	_, err := db.Exec(
 		`INSERT INTO rides (ID, RiderID, StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, riderId, r.StartRideTime, r.PickUpLocation, r.DestinationAddress, r.PassengerCapacity,
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, r.StartRideTime, r.PickUpLocation, r.DestinationAddress, r.PassengerCapacity,
 		r.NumPassengers, r.Status, r.CompletedAt, r.CancelledAt)
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
+// Enrol ride if max capacity is greater than current number of passengers
 func updateRide(id string, r Ride) {
-	_, err := db.Exec(
-		"UPDATE rides SET StartRideTime=?, PickUpLocation=?, DestinationAddress=?, PassengerCapacity=?, NumPassengers=?, Status=?, CompletedAt=?, CancelledAt=? WHERE ID=?",
-		r.StartRideTime, r.PickUpLocation, r.DestinationAddress, r.PassengerCapacity,
-		r.NumPassengers, r.Status, r.CompletedAt, r.CancelledAt, id)
-	if err != nil {
-		panic(err.Error())
+	if r.NumPassengers <= r.PassengerCapacity {
+		_, err := db.Exec(
+			`UPDATE rides SET NumPassengers=? WHERE ID=?`, r.NumPassengers, id)
+		if err != nil {
+			panic(err.Error())
+		}
+	} else {
+		fmt.Print("test")
+		_, err := db.Exec(
+			`UPDATE rides SET Status=? WHERE ID=?`, r.Status, id)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 }
 
@@ -229,8 +236,8 @@ func searchByDestinationAndPickUp(query string) (map[string]Ride, bool) {
 		var id string
 		var completedAt, cancelledAt sql.NullString
 
-		err = results.Scan(&id, &r.RiderID, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
-			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt)
+		err = results.Scan(&id, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
+			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt, &r.RiderID)
 		if err != nil {
 			panic(err.Error())
 		}

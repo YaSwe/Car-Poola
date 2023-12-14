@@ -440,6 +440,11 @@ input:not(:placeholder-shown) + .label label {
     margin-left: 5px;
 }
 
+.exceedMessage {
+    color: var(--red);
+    font-weight: 600;
+}
+
 /* Outcome messages */
 
 .outcome-message {
