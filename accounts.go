@@ -193,8 +193,8 @@ func getAccounts() map[string]Account {
 
 func insertAccount(id string, a Account) {
 	_, err := db.Exec(
-		`INSERT INTO accounts (ID, FirstName, LastName, MobileNumber, Email, UserType, DriverLicenseNumber, CarPlateNumber, Password)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, a.FirstName, a.LastName, a.MobileNumber, a.EmailAddress, a.UserType, a.DriverLicenseNumber, a.CarPlateNumber, a.Password)
+		`INSERT INTO accounts (ID, FirstName, LastName, MobileNumber, Email, UserType, DriverLicenseNumber, CarPlateNumber, Password, CreatedAt)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, a.FirstName, a.LastName, a.MobileNumber, a.EmailAddress, a.UserType, a.DriverLicenseNumber, a.CarPlateNumber, a.Password, a.CreatedAt)
 	if err != nil {
 		panic(err.Error())
 	}

@@ -1,6 +1,7 @@
 import dom from './dom';
 import account from './account';
 import ride from './ride';
+import ridePassengers from './ridePassengers';
 
 const handler = (() => {
 
@@ -93,6 +94,27 @@ const handler = (() => {
                 ride.searchRide(searchbarInput, (rideData) => {
                     dom.displayTrips(rideData);
                 });
+            }
+
+            // Passenger enrol ride
+            if (e.target.classList.contains('enrolBtn')) {
+                const rideID = e.target.getAttribute('data-link-rideid');
+                const ridePassengerData = e.target.getAttribute('data-link-ridedata');
+                let data = JSON.parse(ridePassengerData);
+                let newNumPassengers = data["NumPassengers"] + 1;
+
+                let updateData = {
+                    "Passenger Capacity": data["Passenger Capacity"],
+                    "NumPassengers": newNumPassengers,
+                    "Status": 'started'
+                }
+
+                if (data["Status"] == 'started') {
+                    ride.updateRide(rideID, updateData);
+                    ridePassengers.enrolRide(rideID);
+                } else {
+                    dom.exceedPassengerCapacity(rideID);
+                }
             }
         })
     }

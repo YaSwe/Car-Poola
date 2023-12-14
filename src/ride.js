@@ -1,3 +1,5 @@
+import dom from './dom';
+
 const ride = (() => {
     let url = 'http://localhost:8000/api/v1/rides';
 
@@ -24,9 +26,29 @@ const ride = (() => {
         request.send();
     }
 
+    // Change ride status 
+    const updateRide = (rideID, rideData) => {
+        let updateURL = url + "/" + rideID;
+    
+        let request = new XMLHttpRequest();
+        request.open('PUT', updateURL);
+
+        request.onload = function() {
+            if (request.status == 200) {
+                // Display all trips again
+                ride.getRides((rides) => {
+                    dom.displayTrips(rides);
+                })
+                return;
+            } 
+        }
+        request.send(JSON.stringify(rideData));
+    }
+
     return {
         getRides,
         searchRide,
+        updateRide,
     }
 })();
 

@@ -262,7 +262,8 @@ const dom = (() => {
                         <p>Completed at: <span class="ride-info">${data.Rides[key]["Completed At"]}</span></p>
                         <p>Cancelled at: <span class="ride-info">${data.Rides[key]["Cancelled At"]}</span></p>
                         <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
-                        <button class="btn enrolBtn">Enrol</button>
+                        <button class="btn enrolBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Enrol</button>
+                        <p class="exceedMessage hide" data-link-id='${key}'>Ride is full</p>
                     </div>
                 </div>
             `;
@@ -420,6 +421,11 @@ const dom = (() => {
         document.querySelector('.overlay').classList.remove('active');
     }
 
+    const exceedPassengerCapacity = (rideID) => {
+        const message = document.querySelector(`.exceedMessage[data-link-id="${rideID}"]`);
+        message.classList.remove('hide');
+    }
+
     return {
         toggleSidebar,
         getFormInputs,
@@ -435,6 +441,7 @@ const dom = (() => {
         closeDeleteModal,
         getSearchbarInput,
         displayTrips,
+        exceedPassengerCapacity,
     }
 
 })();
