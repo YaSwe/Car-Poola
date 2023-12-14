@@ -179,7 +179,7 @@ html {
 
 /* Login & Registration Forms */
 
-.accountForm {
+.accountForm, .rideForm {
     background: var(--light-grey);
     padding: 2.5rem;
     border-radius: 0.8rem;
@@ -290,6 +290,7 @@ input:not(:placeholder-shown) + .label label {
     display: flex;
     flex-direction: row;
     flex-wrap: no-wrap;
+    margin-bottom: 3rem;
 }
 
 .userTypeSelection input { display: none; }
@@ -467,7 +468,7 @@ input:not(:placeholder-shown) + .label label {
 }
 
 .updateBtn {
-    margin: 3rem 0;
+    margin-bottom: 3rem;
 }
 
 .delBtn {

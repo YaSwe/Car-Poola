@@ -194,6 +194,8 @@ func getLastRidePassengerIndex() string {
 		if err != nil {
 			panic(err.Error())
 		}
+	} else {
+		return "1"
 	}
 	return lastIndex
 }

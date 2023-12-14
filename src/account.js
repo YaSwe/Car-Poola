@@ -12,12 +12,12 @@ const account = (() => {
         request.onload = function() {
             if (request.status == 201) {
                 // Display account creation success
-                dom.displayMessage('create', 'success');
+                dom.displayMessage('signup', 'success');
                 return;
             } 
         }
         request.send(JSON.stringify(accountData));
-        dom.displayMessage('create', 'error');
+        dom.displayMessage('signup', 'error');
     }
 
     const checkLogin = (email, password) => {
@@ -69,7 +69,6 @@ const account = (() => {
             } 
         }
         request.send(JSON.stringify(accountData));
-        // Display error
         dom.displayMessage('update', 'error');
     }
 

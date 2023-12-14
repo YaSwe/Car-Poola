@@ -38,7 +38,10 @@ const dom = (() => {
             const mobileNoInputValue = document.querySelector('#mobileNo').value;
             const emailInputValue = document.querySelector('#email').value;
             const passwordInputValue= document.querySelector('#password').value;
-            const currentDate = new Date().toISOString; // Get current date in ISO format
+
+            const currentDate = new Date().toISOString(); // Get current date in ISO format
+            const date = new Date(currentDate);
+            const formattedDate = date.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS
             
             // Create JSON
             let accountData = {
@@ -50,7 +53,7 @@ const dom = (() => {
                 "Driver License Number": "",
                 "Car Plate Number": "",
                 "Password": passwordInputValue,
-                "Created At": currentDate
+                "Created At": formattedDate
             }
             return accountData;  
         }
@@ -88,6 +91,25 @@ const dom = (() => {
                 "Password": passwordInputValue
             }
             return accountData;  
+        }
+        else if (action == 'publish-ride') {
+            const pickUpLocationInputValue = document.querySelector('#pickUpLocation').value;
+            const destinationAddressInputValue = document.querySelector('#destinationAddress').value;
+            const passengerCapacityInputValue = document.querySelector('#passengerCapacity').value;
+
+            const currentDate = new Date().toISOString(); // Get current date in ISO format
+            const date = new Date(currentDate);
+            const formattedDate = date.toISOString().slice(0, 19).replace('T', ' '); // YYYY-MM-DD HH:MM:SS
+            let rideData = {
+                "Start Ride Time": formattedDate,
+                "Pick Up Location": pickUpLocationInputValue,
+                "Destination Address": destinationAddressInputValue,
+                "Passenger Capacity": parseInt(passengerCapacityInputValue),
+                "NumPassengers": 0,
+                "Status": "published",
+                "Rider ID": localStorage.getItem('accountID')
+            }
+            return rideData;
         }
     }
 
@@ -191,14 +213,42 @@ const dom = (() => {
         signOutLink.classList.remove('hide');
 
         if (userType == 'passenger') {
+            document.querySelector('.sidebar').innerHTML = `
+                <ul>
+                    <li class="link menu-link select active-link" data-link-destination="rides">
+                        <ion-icon class="menu-icon select" name="car-sport-outline" data-link-destination="rides"></ion-icon>
+                        Rides
+                    </li>
+                    <li class="link menu-link select" data-link-destination="trips">
+                        <ion-icon class="menu-icon select" name="location-outline" data-link-destination="trips"></ion-icon>
+                        My Trips
+                    </li>
+                    <li class="link menu-link select" data-link-destination="profile"> 
+                        <ion-icon class="menu-icon select" name="person-outline" data-link-destination="profile"></ion-icon>
+                        Profile
+                    </li>
+                </ul>
+            `;
             ride.getRides((rides) => {
-                displayTrips(rides);
+                displayAllPassengerRides(rides);
             })
         } 
         else if (userType == 'car owner') {
-            content.innerHTML = `
-            car owner
+            document.querySelector('.sidebar').innerHTML = `
+                <ul>
+                    <li class="link menu-link select active-link" data-link-destination="car-owner-rides">
+                        <ion-icon class="menu-icon select" name="car-sport-outline" data-link-destination="car-owner-rides"></ion-icon>
+                        Rides
+                    </li>
+                    <li class="link menu-link select" data-link-destination="profile"> 
+                        <ion-icon class="menu-icon select" name="person-outline" data-link-destination="profile"></ion-icon>
+                        Profile
+                    </li>
+                </ul>
             `;
+            ride.getCarOwnerRides((rides) => {
+                displayAllCarOwnerRides(rides);
+            })
         }
     }
 
@@ -227,7 +277,7 @@ const dom = (() => {
         // Click on home
         if (destination == 'rides') {
             ride.getRides((rides) => {
-                displayTrips(rides);
+                displayAllPassengerRides(rides);
             })
         } 
         // Click on view profile
@@ -236,9 +286,14 @@ const dom = (() => {
                 displayProfile(accountData);
             }); 
         }
+        else if (destination =='car-owner-rides') {
+            ride.getCarOwnerRides((rides) => {
+                displayAllCarOwnerRides(rides);
+            })
+        }
     }
 
-    const displayTrips = (data) => {
+    const displayAllPassengerRides = (data) => {
         content.innerHTML = `
             <div class="search-container">
                 <ion-icon name="search-outline" id="submitSearch"></ion-icon>
@@ -269,6 +324,44 @@ const dom = (() => {
                 </div>
             `;
         }); 
+    }
+
+    const displayAllCarOwnerRides = (data) => {
+        content.innerHTML = `
+            <button class="btn displayPublishRideBtn">Publish Ride</button>
+            <div class="ridesList"></div>
+        `;
+
+
+        // If no rides are found with the Rider ID
+        if (data == "empty") {
+            content.innerHTML += "";
+            return;
+        }
+
+        let keys = Object.keys(data.Rides);
+        keys.forEach((key) => {
+            document.querySelector('.ridesList').innerHTML += `
+                <div class="ride-container">
+                    <div class="left">
+                        <p>Ride started at: <span class="ride-info">${data.Rides[key]["Start Ride Time"]}</span></p>
+                        <p>Pick-up location: <span class="ride-info">${data.Rides[key]["Pick Up Location"]}</span></p>
+                        <p>Destination: <span class="ride-info">${data.Rides[key]["Destination Address"]}</span></p>
+                        <p>Capacity: <span class="ride-info">${data.Rides[key]["Passenger Capacity"]}</span></p>
+                        <p>Passengers: <span class="ride-info">${data.Rides[key]["NumPassengers"]}</span></p>
+                    </div>
+                    <div class="right">
+                        <p>Completed at: <span class="ride-info">${data.Rides[key]["Completed At"]}</span></p>
+                        <p>Cancelled at: <span class="ride-info">${data.Rides[key]["Cancelled At"]}</span></p>
+                        <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
+                        <button class="btn startRideBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Start Ride</button>
+                        <button class="btn cancelRideBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Cancel Ride</button>
+                        <p class="exceedMessage hide" data-link-id='${key}'>Ride is full</p>
+                    </div>
+                </div>
+            `;
+        }); 
+
     }
 
     const getSearchbarInput = () => {
@@ -380,7 +473,7 @@ const dom = (() => {
     }
 
     const displayMessage = (type, outcome) => {
-        if (type == 'create' && outcome == 'success') {
+        if (type == 'signup' && outcome == 'success') {
             content.innerHTML = `
                 <div class="outcome-message signUpMessage">
                     <p>Successfully created account</p>
@@ -388,7 +481,7 @@ const dom = (() => {
                 </div>
             `;
         }
-        else if (type == 'create' && outcome == 'error') {
+        else if (type == 'signup' && outcome == 'error') {
             content.innerHTML = `
                 <div class="outcome-message signUpMessage">
                     <p>Registration error. Try again</p>
@@ -409,6 +502,13 @@ const dom = (() => {
         }
         else if (type == 'delete' && outcome == 'error') {
             content.innerHTML = '<p class="outcome-message">Account is less than a year old</p>'
+        }
+
+        if (type == 'publish' && outcome == 'success') {
+            content.innerHTML = `<p class="outcome-message">Ride has been published.</p>`;
+        }
+        else if (type == 'publish' && outcome == 'error') {
+            content.innerHTML = `<p class="outcome-message">An error occured. Ride was not published.</p>`;
         }
     }
 
@@ -432,6 +532,38 @@ const dom = (() => {
         message.classList.remove('hide');
     }
 
+    const displayPublishRideForm = () => {
+        content.innerHTML = `
+            <form class="rideForm" action="#">
+                <div class="input-selection">
+                    <input type="text" id="pickUpLocation" placeholder=" " required>
+                    <div class="label">
+                        <label for="pickUpLocation">Pick Up Location</label>
+                    </div>
+                </div>
+
+                <div class="input-selection">
+                    <input type="text" id="destinationAddress" placeholder=" " required>
+                    <div class="label">
+                        <label for="destinationAddress">Destination Address</label>
+                    </div>
+                </div>
+
+                <div class="input-selection">
+                    <label for="passengerCapacity">Passenger Capacity</label>
+                    <select id="passengerCapacity">
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </div>
+
+                <button class="btn publishRideBtn">Publish</button>
+            </form>
+        `;
+    }
+
     return {
         toggleSidebar,
         getFormInputs,
@@ -446,9 +578,11 @@ const dom = (() => {
         displayDeleteModal,
         closeDeleteModal,
         getSearchbarInput,
-        displayTrips,
+        displayAllPassengerRides,
         exceedPassengerCapacity,
         displayPassengerInRide,
+        displayAllCarOwnerRides,
+        displayPublishRideForm,
     }
 
 })();

@@ -92,7 +92,7 @@ const handler = (() => {
             if (e.target.getAttribute('id') == 'submitSearch') {
                 let searchbarInput = dom.getSearchbarInput();
                 ride.searchRide(searchbarInput, (rideData) => {
-                    dom.displayTrips(rideData);
+                    dom.displayAllPassengerRides(rideData);
                 });
             }
 
@@ -119,6 +119,17 @@ const handler = (() => {
                 } else {
                     dom.exceedPassengerCapacity(rideID);
                 }
+            }
+
+            // Display form for publishing ride
+            if (e.target.classList.contains('displayPublishRideBtn')) {
+                dom.displayPublishRideForm();
+            }
+
+            // Publish ride
+            if (e.target.classList.contains('publishRideBtn')) {
+                let rideData = dom.getFormInputs('publish-ride');
+                ride.createRide(rideData);
             }
         })
     }
