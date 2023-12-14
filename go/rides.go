@@ -25,7 +25,6 @@ type Ride struct {
 func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	rideID := params["rideID"]
-	riderID := params["riderID"]
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -43,7 +42,7 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 			rideID := getLastRideIndex()
 
 			if _, ok := isRideExist(rideID); !ok {
-				insertRide(rideID, riderID, data)
+				insertRide(rideID, data)
 				w.WriteHeader(http.StatusCreated)
 			} else {
 				w.WriteHeader(http.StatusConflict)
@@ -122,13 +121,28 @@ func HandleRideRequest(w http.ResponseWriter, r *http.Request) {
 func SearchRides(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
 	searchQuery := querystringmap.Get("search")
+	riderIDQuery := querystringmap.Get("riderID")
 
 	if value := searchQuery; len(value) > 0 {
 		results, found := searchByDestinationAndPickUp(searchQuery)
 
 		if !found {
+			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "No ride found")
 		} else {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(struct {
+				Rides map[string]Ride `json:"Rides"`
+			}{results})
+		}
+	} else if value = riderIDQuery; len(value) > 0 {
+		results, found := searchByRiderID(riderIDQuery)
+
+		if !found {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintf(w, "No ride found")
+		} else {
+			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(struct {
 				Rides map[string]Ride `json:"Rides"`
 			}{results})
@@ -187,11 +201,11 @@ func getRides() map[string]Ride {
 	return rides
 }
 
-func insertRide(id string, riderID string, r Ride) {
+func insertRide(id string, r Ride) {
 	_, err := db.Exec(
-		`INSERT INTO rides (ID, RiderID, StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, r.StartRideTime, r.PickUpLocation, r.DestinationAddress, r.PassengerCapacity,
-		r.NumPassengers, r.Status, r.CompletedAt, r.CancelledAt)
+		`INSERT INTO rides (ID, StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt, RiderID)
+			VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)`, id, r.StartRideTime, r.PickUpLocation, r.DestinationAddress, r.PassengerCapacity,
+		r.NumPassengers, r.Status, r.RiderID)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -259,10 +273,50 @@ func searchByDestinationAndPickUp(query string) (map[string]Ride, bool) {
 	return rides, true
 }
 
+func searchByRiderID(query string) (map[string]Ride, bool) {
+	results, err := db.Query("SELECT * FROM rides WHERE RiderID=?", query)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var rides map[string]Ride = map[string]Ride{}
+
+	for results.Next() {
+		var r Ride
+		var id string
+		var completedAt, cancelledAt sql.NullString
+
+		err = results.Scan(&id, &r.StartRideTime, &r.PickUpLocation, &r.DestinationAddress, &r.PassengerCapacity,
+			&r.NumPassengers, &r.Status, &completedAt, &cancelledAt, &r.RiderID)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		// Handle null values
+		if completedAt.Valid {
+			r.CompletedAt = completedAt.String
+		}
+		if cancelledAt.Valid {
+			r.CancelledAt = cancelledAt.String
+		}
+
+		rides[id] = r
+	}
+
+	if len(rides) == 0 {
+		return rides, false
+	}
+
+	return rides, true
+}
+
 func getLastRideIndex() string {
 	var lastIndex string
-	results, err := db.Query("SELECT MAX(ID) + 1 AS RIDE_ID FROM rides")
+	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS RIDE_ID FROM rides")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "1" // Return default value when there are no rows
+		}
 		panic(err.Error())
 	}
 

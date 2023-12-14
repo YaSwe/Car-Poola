@@ -192,9 +192,10 @@ func getAccounts() map[string]Account {
 }
 
 func insertAccount(id string, a Account) {
+
 	_, err := db.Exec(
 		`INSERT INTO accounts (ID, FirstName, LastName, MobileNumber, Email, UserType, DriverLicenseNumber, CarPlateNumber, Password, CreatedAt)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, a.FirstName, a.LastName, a.MobileNumber, a.EmailAddress, a.UserType, a.DriverLicenseNumber, a.CarPlateNumber, a.Password, a.CreatedAt)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, id, a.FirstName, a.LastName, a.MobileNumber, a.EmailAddress, a.UserType, a.DriverLicenseNumber, a.CarPlateNumber, a.Password, a.CreatedAt)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -249,8 +250,11 @@ func checkLoginCredentials(email string, password string) (string, string, bool)
 
 func getLastAccountIndex() string {
 	var lastIndex string
-	results, err := db.Query("SELECT MAX(ID) + 1 AS ACC_ID FROM accounts")
+	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS ACC_ID FROM accounts")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "1" // Return default value when there are no rows
+		}
 		panic(err.Error())
 	}
 

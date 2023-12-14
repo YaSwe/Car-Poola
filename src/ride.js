@@ -37,7 +37,7 @@ const ride = (() => {
             if (request.status == 200) {
                 // Display all trips again
                 ride.getRides((rides) => {
-                    dom.displayTrips(rides);
+                    dom.displayAllPassengerRides(rides);
                 })
                 return;
             } 
@@ -45,10 +45,47 @@ const ride = (() => {
         request.send(JSON.stringify(rideData));
     }
 
+    const getCarOwnerRides = (callback) => {
+        const riderID = localStorage.getItem('accountID');
+        let searchURL = url + `?riderID=${riderID}`;
+        let request = new XMLHttpRequest();
+        request.open('GET', searchURL);
+    
+        request.onload = function() {
+            if (request.status == 200) {
+                let rideData = JSON.parse(this.response);
+                callback(rideData);
+            }
+            return;
+        }
+        request.send();
+        callback("empty")
+    }
+
+    const createRide = (rideData) => {
+        let createURL = url + "/" + "id";
+
+        let request = new XMLHttpRequest();
+        request.open('POST', createURL);
+        
+        request.onload = function() {
+            if (request.status == 201) {
+                // Display ride creation success
+                dom.displayMessage('publish', 'success');
+                return;
+            } 
+        }
+        request.send(JSON.stringify(rideData));
+        // If ride creation fails
+        dom.displayMessage('publish', 'error');
+    }
+
     return {
         getRides,
         searchRide,
         updateRide,
+        getCarOwnerRides,
+        createRide
     }
 })();
 
