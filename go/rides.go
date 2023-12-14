@@ -125,6 +125,7 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 	riderIDQuery := querystringmap.Get("riderID")
 	checkStartTimeQuery := querystringmap.Get("checkStartTime")
 
+	// Search ride by destination and pick up location
 	if value := searchQuery; len(value) > 0 {
 		results, found := searchByDestinationAndPickUp(searchQuery)
 
@@ -137,6 +138,7 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 				Rides map[string]Ride `json:"Rides"`
 			}{results})
 		}
+		// Search ride by rider ID
 	} else if value = riderIDQuery; len(value) > 0 {
 		results, found := searchByRiderID(riderIDQuery)
 
@@ -149,6 +151,7 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 				Rides map[string]Ride `json:"Rides"`
 			}{results})
 		}
+		// Check ride start time if it was 30 mins ago
 	} else if value = checkStartTimeQuery; len(value) > 0 {
 		isThirtyMinsAgo, err := checkRideStartTime(checkStartTimeQuery)
 		if err != nil {
@@ -172,6 +175,7 @@ func SearchRides(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Check if ride exists in table
 func isRideExist(id string) (Ride, bool) {
 	var r Ride
 
@@ -185,6 +189,7 @@ func isRideExist(id string) (Ride, bool) {
 	return r, true
 }
 
+// Get all rides
 func getRides() map[string]Ride {
 	results, err := db.Query("SELECT * FROM rides")
 	if err != nil {
@@ -217,6 +222,7 @@ func getRides() map[string]Ride {
 	return rides
 }
 
+// Insert a ride row into the table
 func insertRide(id string, r Ride) {
 	_, err := db.Exec(
 		`INSERT INTO rides (ID, StartRideTime, PickUpLocation, DestinationAddress, PassengerCapacity, NumPassengers, Status, CompletedAt, CancelledAt, RiderID)
@@ -227,14 +233,16 @@ func insertRide(id string, r Ride) {
 	}
 }
 
-// Enrol ride if max capacity is greater than current number of passengers
+// Passenger can enrol ride if max capacity is more than current number of passengers
 func updateRide(id string, r Ride) {
+	// If the no. of passengers is lesser than max capacity, increase no. of passengers by 1
 	if r.NumPassengers <= r.PassengerCapacity {
 		_, err := db.Exec(
 			`UPDATE rides SET NumPassengers=? WHERE ID=?`, r.NumPassengers, id)
 		if err != nil {
 			panic(err.Error())
 		}
+		// If the no. of passengers is more than max capacity, set the status from published to started
 	} else {
 		_, err := db.Exec(
 			`UPDATE rides SET Status=? WHERE ID=?`, r.Status, id)
@@ -244,6 +252,7 @@ func updateRide(id string, r Ride) {
 	}
 }
 
+// Delete row if ID matches
 func delRide(id string) (int64, error) {
 	result, err := db.Exec("DELETE from rides WHERE ID=?", id)
 	if err != nil {
@@ -252,6 +261,7 @@ func delRide(id string) (int64, error) {
 	return result.RowsAffected()
 }
 
+// Search rides by destination and pickup from the search bar input
 func searchByDestinationAndPickUp(query string) (map[string]Ride, bool) {
 	results, err := db.Query("SELECT * FROM rides WHERE LOWER(DestinationAddress) LIKE LOWER(?) OR LOWER(PickUpLocation) LIKE LOWER(?)", "%"+query+"%", "%"+query+"%")
 	if err != nil {
@@ -289,6 +299,7 @@ func searchByDestinationAndPickUp(query string) (map[string]Ride, bool) {
 	return rides, true
 }
 
+// Retrieve rides with the rider ID
 func searchByRiderID(query string) (map[string]Ride, bool) {
 	results, err := db.Query("SELECT * FROM rides WHERE RiderID=?", query)
 	if err != nil {
@@ -326,6 +337,7 @@ func searchByRiderID(query string) (map[string]Ride, bool) {
 	return rides, true
 }
 
+// Check if the ride start time was 30 mins ago
 func checkRideStartTime(rideID string) (bool, error) {
 	var isThirtyMinsAgo int
 	thirtyMinutesAgo := time.Now().Add(-30 * time.Minute).Format("2006-01-02 15:04:05")
@@ -338,6 +350,7 @@ func checkRideStartTime(rideID string) (bool, error) {
 	return isThirtyMinsAgo == 1, nil
 }
 
+// Get last ride row index and +1
 func getLastRideIndex() string {
 	var lastIndex string
 	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS RIDE_ID FROM rides")

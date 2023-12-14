@@ -18,7 +18,6 @@ type RidePassengers struct {
 func HandleRidePassengersRequest(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	rideID := params["rideID"]
-	//passengerID := params["passengerID"]
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -87,11 +86,11 @@ func HandleRidePassengersRequest(w http.ResponseWriter, r *http.Request) {
 
 		// If ride exists
 	} else if val, ok := isRidePassengerExist(rideID); ok {
-		// Delete account
+		// Delete ride passenger
 		if r.Method == "DELETE" {
 			delRidePassenger(rideID)
 
-			// Get account
+			// Get ride passenger
 		} else {
 			json.NewEncoder(w).Encode(val)
 		}
@@ -106,24 +105,30 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 	rideQuery := querystringmap.Get("rideID")
 	passengerQuery := querystringmap.Get("passengerID")
 
+	// Search by ride ID and passenger ID
 	if value := passengerQuery; len(value) > 0 {
 		results, found := searchByPassenger(rideQuery, passengerQuery)
 
+		// If not found
 		if !found {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "No ride found")
+			// If found
 		} else {
 			w.WriteHeader(http.StatusConflict)
 			json.NewEncoder(w).Encode(struct {
 				Rides map[string]RidePassengers `json:"Rides"`
 			}{results})
 		}
+		// Search by ride ID only
 	} else if value = rideQuery; len(value) > 0 {
 		results, found := searchRidesWithRideID(rideQuery)
 
+		// If not found
 		if !found {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "No ride found")
+			// If found
 		} else {
 			w.WriteHeader(http.StatusConflict)
 			json.NewEncoder(w).Encode(struct {
@@ -139,6 +144,7 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Retrieve the ride with the rideID and passengerID
 func searchByPassenger(rideID string, passengerID string) (map[string]RidePassengers, bool) {
 	results, err := db.Query("SELECT * FROM ride_passengers WHERE RideID=? AND PassengerID=?", rideID, passengerID)
 	if err != nil {
@@ -166,6 +172,7 @@ func searchByPassenger(rideID string, passengerID string) (map[string]RidePassen
 	return rides, true
 }
 
+// Retrieve the ride with the rideID
 func searchRidesWithRideID(rideID string) (map[string]RidePassengers, bool) {
 	results, err := db.Query("SELECT * FROM ride_passengers WHERE RideID=?", rideID)
 	if err != nil {
@@ -193,6 +200,7 @@ func searchRidesWithRideID(rideID string) (map[string]RidePassengers, bool) {
 	return rides, true
 }
 
+// Check if the ride exists in the table
 func isRidePassengerExist(id string) (RidePassengers, bool) {
 	var r RidePassengers
 
@@ -205,6 +213,7 @@ func isRidePassengerExist(id string) (RidePassengers, bool) {
 	return r, true
 }
 
+// Add a new row in ride_passengers table
 func insertRidePassenger(id string, r RidePassengers) {
 	_, err := db.Exec(
 		`INSERT INTO ride_passengers (ID, RideID, PassengerID) VALUES (?, ?, ?)`, id, r.RideID, r.PassengerID)
@@ -213,6 +222,7 @@ func insertRidePassenger(id string, r RidePassengers) {
 	}
 }
 
+// Update ride status
 func updateRidePassenger(id string, r RidePassengers) {
 	_, err := db.Exec(
 		"UPDATE rides SET Status=? WHERE ID=?", id)
@@ -221,6 +231,7 @@ func updateRidePassenger(id string, r RidePassengers) {
 	}
 }
 
+// Delete the row if the ID matches
 func delRidePassenger(id string) (int64, error) {
 	result, err := db.Exec("DELETE from ride_passengers WHERE ID=?", id)
 	if err != nil {
@@ -229,6 +240,7 @@ func delRidePassenger(id string) (int64, error) {
 	return result.RowsAffected()
 }
 
+// Get the last index of the table and +1
 func getLastRidePassengerIndex() string {
 	var lastIndex string
 	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS RidePassenger_ID FROM ride_passengers")

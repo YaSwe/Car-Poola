@@ -15,19 +15,22 @@ var (
 )
 
 func main() {
-	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/carpoola")
+	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/carpoola") // Localhost 8000
 
 	if err != nil {
 		panic(err.Error())
 	}
 
 	router := mux.NewRouter()
+	// Accounts
 	router.HandleFunc("/api/v1/accounts/{accountID}", HandleAccountRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/accounts", SearchAccounts)
 
+	// Rides
 	router.HandleFunc("/api/v1/rides/{rideID}", HandleRideRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/rides", SearchRides)
 
+	// Ride_Passengers
 	router.HandleFunc("/api/v1/ridePassengers/{rideID}", HandleRidePassengersRequest).Methods("GET", "DELETE", "POST", "PATCH", "PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/ridePassengers", SearchPassengerRides)
 

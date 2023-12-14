@@ -117,6 +117,7 @@ func HandleAccountRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Search the account with the associated email and password for login
 func SearchAccounts(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
 	emailStr := querystringmap.Get("email")
@@ -125,9 +126,11 @@ func SearchAccounts(w http.ResponseWriter, r *http.Request) {
 	if value := emailStr; len(value) > 0 {
 		id, userType, found := checkLoginCredentials(emailStr, passwordStr)
 
+		// If not found
 		if !found {
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, "No accounts found")
+			// If found
 		} else {
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(map[string]interface{}{
@@ -144,6 +147,7 @@ func SearchAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Check if the specified account with the account ID exists in the database
 func isAccountExist(id string) (Account, bool) {
 	var a Account
 	var createdAt sql.NullString
@@ -162,6 +166,7 @@ func isAccountExist(id string) (Account, bool) {
 	return a, true
 }
 
+// Get all accounts
 func getAccounts() map[string]Account {
 	results, err := db.Query("SELECT * FROM accounts")
 	if err != nil {
@@ -191,6 +196,7 @@ func getAccounts() map[string]Account {
 	return accounts
 }
 
+// Insert new account row into table
 func insertAccount(id string, a Account) {
 
 	_, err := db.Exec(
@@ -201,6 +207,7 @@ func insertAccount(id string, a Account) {
 	}
 }
 
+// Update account
 func updateAccount(id string, a Account) {
 	_, err := db.Exec(
 		"UPDATE accounts SET FirstName=?, LastName=?, MobileNumber=?, Email=?, UserType=?, DriverLicenseNumber=?, CarPlateNumber=?, Password=? WHERE ID=?",
@@ -228,6 +235,7 @@ func delAccount(id string) (int64, error) {
 	return result.RowsAffected()
 }
 
+// Check the account with the matching email and password and retrieve its ID and user type
 func checkLoginCredentials(email string, password string) (string, string, bool) {
 	var id, userType string
 
@@ -248,6 +256,7 @@ func checkLoginCredentials(email string, password string) (string, string, bool)
 	return "", "", false
 }
 
+// Get the last account index and add + 1
 func getLastAccountIndex() string {
 	var lastIndex string
 	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS ACC_ID FROM accounts")
