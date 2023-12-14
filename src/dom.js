@@ -264,6 +264,7 @@ const dom = (() => {
                         <p>Status: <span class="ride-info">${data.Rides[key]["Status"]}</span></p>
                         <button class="btn enrolBtn" data-link-rideID="${key}" data-link-rideData='${JSON.stringify(data.Rides[key])}'>Enrol</button>
                         <p class="exceedMessage hide" data-link-id='${key}'>Ride is full</p>
+                        <p class="inRideMessage hide" data-link-id='${key}'>Already in ride</p>
                     </div>
                 </div>
             `;
@@ -426,6 +427,11 @@ const dom = (() => {
         message.classList.remove('hide');
     }
 
+    const displayPassengerInRide = (rideID) => {
+        const message = document.querySelector(`.inRideMessage[data-link-id="${rideID}"]`);
+        message.classList.remove('hide');
+    }
+
     return {
         toggleSidebar,
         getFormInputs,
@@ -442,6 +448,7 @@ const dom = (() => {
         getSearchbarInput,
         displayTrips,
         exceedPassengerCapacity,
+        displayPassengerInRide,
     }
 
 })();

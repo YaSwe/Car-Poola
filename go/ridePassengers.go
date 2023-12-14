@@ -50,7 +50,7 @@ func HandleRidePassengersRequest(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "PUT" {
 		var data RidePassengers
 		if err := json.Unmarshal(body, &data); err == nil {
-			if _, ok := isRidePassengerExist(rideID); ok {
+			if _, ok := isRidePassengerExist(rideID); !ok {
 				updateRidePassenger(rideID, data)
 				w.WriteHeader(http.StatusOK)
 			} else {
@@ -103,14 +103,17 @@ func HandleRidePassengersRequest(w http.ResponseWriter, r *http.Request) {
 
 func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 	querystringmap := r.URL.Query()
-	searchQuery := querystringmap.Get("passengerID")
+	rideQuery := querystringmap.Get("rideID")
+	passengerQuery := querystringmap.Get("passengerID")
 
-	if value := searchQuery; len(value) > 0 {
-		results, found := searchByPassenger(searchQuery)
+	if value := rideQuery; len(value) > 0 {
+		results, found := searchByPassenger(rideQuery, passengerQuery)
 
 		if !found {
+			w.WriteHeader(http.StatusOK)
 			fmt.Fprintf(w, "No ride found")
 		} else {
+			w.WriteHeader(http.StatusConflict)
 			json.NewEncoder(w).Encode(struct {
 				Rides map[string]RidePassengers `json:"Rides"`
 			}{results})
@@ -124,8 +127,8 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func searchByPassenger(query string) (map[string]RidePassengers, bool) {
-	results, err := db.Query("SELECT * FROM rides JOIN ride_passengers ON rides.ID=ride_passengers.RideID WHERE ride_passengers.PassengerID=?", query)
+func searchByPassenger(rideID string, passengerID string) (map[string]RidePassengers, bool) {
+	results, err := db.Query("SELECT * FROM rides_passengers WHERE RideID=? AND PassengerID=?", rideID, passengerID)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -148,7 +151,7 @@ func searchByPassenger(query string) (map[string]RidePassengers, bool) {
 		return rides, false
 	}
 
-	return rides, true
+	return rides, len(rides) > 0
 }
 
 func isRidePassengerExist(id string) (RidePassengers, bool) {

@@ -27,8 +27,25 @@ const ridePassengers = (() => {
         //dom.displayMessage('create', 'error');
     }
 
+    const passengerInRide = (rideID, passengerID) => {
+        let searchURL = url + `?rideID=${rideID}&passengerID=${passengerID}`;
+        let request = new XMLHttpRequest();
+        request.open('GET', searchURL);
+    
+        request.onload = function() {
+            // If not found
+            if (request.status == 200) {
+                return false;
+            } 
+        }
+        request.send();
+        // If found
+        return true;
+    }
+
     return {
         enrolRide,
+        passengerInRide,
     }
 })();
 
