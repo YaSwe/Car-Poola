@@ -27,7 +27,7 @@ const ridePassengers = (() => {
         //dom.displayMessage('create', 'error');
     }
 
-    const passengerInRide = (rideID, passengerID) => {
+    const passengerInRide = (rideID, passengerID, callback) => {
         let searchURL = url + `?rideID=${rideID}&passengerID=${passengerID}`;
         let request = new XMLHttpRequest();
         request.open('GET', searchURL);
@@ -35,17 +35,36 @@ const ridePassengers = (() => {
         request.onload = function() {
             // If not found
             if (request.status == 200) {
-                return false;
+                callback(false);
+            // If found
+            } else {
+                callback(true);
+            }
+        }
+        request.send();
+    }
+
+    const delRidePassenger = (rideID) => {
+        let deleteURL = url + "/" + rideID;
+
+        let request = new XMLHttpRequest();
+        request.open('DELETE', deleteURL);
+
+        request.onload = function() {
+            if (request.status == 200) {
+                console.log("success")
+                return;
             } 
         }
         request.send();
-        // If found
-        return true;
+        // Display error
+        console.log("failed")
     }
 
     return {
         enrolRide,
         passengerInRide,
+        delRidePassenger,
     }
 })();
 
