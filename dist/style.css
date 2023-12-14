@@ -161,6 +161,7 @@ html {
     align-items: center;
     min-height: 100vh;
     transition: background-color 250ms;
+    padding-top: 70px;
 }
 
 .content.active {

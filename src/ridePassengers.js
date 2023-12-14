@@ -44,8 +44,8 @@ const ridePassengers = (() => {
         request.send();
     }
 
-    const delRidePassenger = (rideID) => {
-        let deleteURL = url + "/" + rideID;
+    const delRidePassenger = (ridePassengerID) => {
+        let deleteURL = url + "/" + ridePassengerID;
 
         let request = new XMLHttpRequest();
         request.open('DELETE', deleteURL);
@@ -53,18 +53,35 @@ const ridePassengers = (() => {
         request.onload = function() {
             if (request.status == 200) {
                 console.log("success")
-                return;
             } 
+            return;
         }
         request.send();
-        // Display error
         console.log("failed")
+    }
+
+    const searchIfRideExists = (rideID , callback) => {
+        let searchURL = url + `?rideID=${rideID}`;
+        let request = new XMLHttpRequest();
+        request.open('GET', searchURL);
+    
+        request.onload = function() {
+            // If not found
+            if (request.status == 200) {
+                callback(false);
+            // If found
+            } else {
+                callback(true);
+            }
+        }
+        request.send();
     }
 
     return {
         enrolRide,
         passengerInRide,
         delRidePassenger,
+        searchIfRideExists,
     }
 })();
 

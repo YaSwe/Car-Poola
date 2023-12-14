@@ -137,10 +137,32 @@ const handler = (() => {
                 ride.createRide(rideData);
             }
 
+            // Cancel ride
             if (e.target.classList.contains('cancelRideBtn')) {
-                let rideID = e.target.getAttribute('data-link-id');
-                ridePassengers.delRidePassenger(rideID);
-
+                const rideID = e.target.getAttribute('data-link-rideid');
+                ride.checkRideStartTime(rideID, function(result) {
+                    if (result == true) {
+                        ridePassengers.searchIfRideExists(rideID, function(result) {
+                            if (result == true) {
+                                // Passenger found in the table
+                                ridePassengers.delRidePassenger(rideID);
+                                ride.delRide(rideID);
+                                ride.getCarOwnerRides((rides) => {
+                                    dom.displayAllCarOwnerRides(rides);
+                                })
+                            } else {
+                                // Passenger not found in the table
+                                ride.delRide(rideID);
+                                ride.getCarOwnerRides((rides) => {
+                                    dom.displayAllCarOwnerRides(rides);
+                                })
+                            }
+                        });
+                    }
+                    else {
+                        dom.displayStartTimeError(rideID);
+                    }
+                });
             }
         })
     }
