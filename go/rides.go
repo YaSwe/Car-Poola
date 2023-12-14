@@ -206,7 +206,6 @@ func updateRide(id string, r Ride) {
 			panic(err.Error())
 		}
 	} else {
-		fmt.Print("test")
 		_, err := db.Exec(
 			`UPDATE rides SET Status=? WHERE ID=?`, r.Status, id)
 		if err != nil {

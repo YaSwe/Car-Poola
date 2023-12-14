@@ -110,8 +110,12 @@ const handler = (() => {
                 }
 
                 if (data["Status"] == 'started') {
-                    ride.updateRide(rideID, updateData);
-                    ridePassengers.enrolRide(rideID);
+                    if (!ridePassengers.passengerInRide) {
+                        ride.updateRide(rideID, updateData);
+                        ridePassengers.enrolRide(rideID);
+                    } else {
+                        dom.displayPassengerInRide(rideID);
+                    }
                 } else {
                     dom.exceedPassengerCapacity(rideID);
                 }
