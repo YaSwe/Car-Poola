@@ -109,14 +109,19 @@ const handler = (() => {
                     "Status": 'started'
                 }
 
-                if (data["Status"] == 'started') {
-                    if (!ridePassengers.passengerInRide) {
-                        ride.updateRide(rideID, updateData);
-                        ridePassengers.enrolRide(rideID);
-                    } else {
-                        dom.displayPassengerInRide(rideID);
-                    }
-                } else {
+                if (data["Status"] == 'published') {
+                    const accountID = localStorage.getItem('accountID');
+                    ridePassengers.passengerInRide(rideID, accountID, function(result) {
+                        if (result == true) {
+                            // Passenger found in the ride
+                            dom.displayPassengerInRide(rideID);
+                        } else {
+                            // Passenger not found in the ride
+                            ride.updateRide(rideID, updateData);
+                            ridePassengers.enrolRide(rideID);
+                        }
+                    });
+                } else if (data["Status"] == 'started') {
                     dom.exceedPassengerCapacity(rideID);
                 }
             }
@@ -130,6 +135,12 @@ const handler = (() => {
             if (e.target.classList.contains('publishRideBtn')) {
                 let rideData = dom.getFormInputs('publish-ride');
                 ride.createRide(rideData);
+            }
+
+            if (e.target.classList.contains('cancelRideBtn')) {
+                let rideID = e.target.getAttribute('data-link-id');
+                ridePassengers.delRidePassenger(rideID);
+
             }
         })
     }

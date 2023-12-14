@@ -89,7 +89,7 @@ func HandleRidePassengersRequest(w http.ResponseWriter, r *http.Request) {
 	} else if val, ok := isRidePassengerExist(rideID); ok {
 		// Delete account
 		if r.Method == "DELETE" {
-			delRide(rideID)
+			delRidePassenger(rideID)
 
 			// Get account
 		} else {
@@ -128,7 +128,7 @@ func SearchPassengerRides(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchByPassenger(rideID string, passengerID string) (map[string]RidePassengers, bool) {
-	results, err := db.Query("SELECT * FROM rides_passengers WHERE RideID=? AND PassengerID=?", rideID, passengerID)
+	results, err := db.Query("SELECT * FROM ride_passengers WHERE RideID=? AND PassengerID=?", rideID, passengerID)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -151,7 +151,7 @@ func searchByPassenger(rideID string, passengerID string) (map[string]RidePassen
 		return rides, false
 	}
 
-	return rides, len(rides) > 0
+	return rides, true
 }
 
 func isRidePassengerExist(id string) (RidePassengers, bool) {
@@ -182,10 +182,21 @@ func updateRidePassenger(id string, r RidePassengers) {
 	}
 }
 
+func delRidePassenger(id string) (int64, error) {
+	result, err := db.Exec("DELETE from ride_passengers WHERE ID=?", id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func getLastRidePassengerIndex() string {
 	var lastIndex string
-	results, err := db.Query("SELECT MAX(ID) + 1 AS RidePassenger_ID FROM ride_passengers")
+	results, err := db.Query("SELECT COALESCE(MAX(ID), 0) + 1 AS RidePassenger_ID FROM ride_passengers")
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return "1" // Return default value when there are no rows
+		}
 		panic(err.Error())
 	}
 
@@ -194,8 +205,6 @@ func getLastRidePassengerIndex() string {
 		if err != nil {
 			panic(err.Error())
 		}
-	} else {
-		return "1"
 	}
 	return lastIndex
 }
