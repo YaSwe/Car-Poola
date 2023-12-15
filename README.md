@@ -15,7 +15,7 @@ This project comprises three microservices:
 - **Source file bundling** Used webpack bundler to package src files
 
 ## Architecture Diagram
-![Architecture Diagram](link-to-your-image)
+![Architecture Diagram](./carpoola_diagram)
 
 ## Instructions for Setup
 - Create the respective tables: rides, accounts and ride_passengers
